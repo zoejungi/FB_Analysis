@@ -70,7 +70,7 @@ def SUS (df_q, n_questions, FB_mode):
         plt.ylabel('Values')
         plt.title(f'{FB_mode} SUS Q{i + 1}, n = {len(df_q)}')
         plt.legend()
-        plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\{FB_mode}_SUS_Q{i+1}')
+        #plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\{FB_mode}_SUS_Q{i+1}')
 
         #plt.show()
 
@@ -126,7 +126,7 @@ ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', '
 plt.xticks(fontsize = f)
 plt.yticks(fontsize = f)
 plt.legend(loc = (0.88,0.75), fontsize = f)
-plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\hFB_TLX_STvsPOFvsAPF')
+#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\hFB_TLX_STvsPOFvsAPF')
 #plt.show()
 
 fig, ax = plt.subplots(figsize=(11, 8), subplot_kw=dict(polar=True))
@@ -139,7 +139,7 @@ ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', '
 plt.xticks(fontsize = f)
 plt.yticks(fontsize = f)
 plt.legend(loc = (0.88,0.75), fontsize = f)
-plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\vFB_TLX_STvsPOFvsAPF')
+#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\vFB_TLX_STvsPOFvsAPF')
 #plt.show()
 
 # Plot the spiderweb graph ST
@@ -152,7 +152,7 @@ ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', '
 plt.xticks(fontsize = f)
 plt.yticks(fontsize = f)
 plt.legend(loc = (0.88,0.75), fontsize = f)
-plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_ST')
+#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_ST')
 #plt.show()
 
 # Plot the spiderweb graph POF
@@ -165,7 +165,7 @@ ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', '
 plt.xticks(fontsize = f)
 plt.yticks(fontsize = f)
 plt.legend(loc = (0.88,0.75), fontsize = f)
-plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_POF')
+#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_POF')
 #plt.show()
 
 # Plot the spiderweb graph APF
@@ -178,5 +178,5 @@ ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', '
 plt.xticks(fontsize = f)
 plt.yticks(fontsize = f)
 plt.legend(loc = (0.88,0.75), fontsize = f)
-plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_APF')
+#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_APF')
 #plt.show()

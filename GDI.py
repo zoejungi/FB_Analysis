@@ -66,13 +66,10 @@ def get_data(data_use, FB_param, input_path, excl=[]):
                 # Subject folder name contains one of the subjects from excl
                 continue  # Skip processing this folder
             subject_path = os.path.join(input_path, subject_folder)
-            if FB_param == 'APF':
-                param_path = os.path.join(subject_path, "out_apf")
-            elif FB_param == 'POF':
-                param_path = os.path.join(subject_path, "out_pof")
-            elif FB_param == 'ST':
-                param_path = os.path.join(subject_path, "out_st")
-
+            for folder in os.listdir(subject_path):
+                if FB_param.lower() in folder.lower():
+                    param_path = os.path.join(subject_path, folder)
+                    break
             # Check if out directory exists for the subject
             if os.path.exists(param_path) and os.path.isdir(param_path):
                 files_in_param_path = [os.path.join(param_path, f) for f in os.listdir(param_path) if any(param_subpath in f for param_subpath in parameters_subpaths)]

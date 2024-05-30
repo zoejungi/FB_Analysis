@@ -37,7 +37,7 @@ def TLX (df_q, excl = []):
 
     return [angles, values_ST, values_POF, values_APF]
 
-def SUS (df_q, n_questions, FB_mode):
+def SUS (df_q, n_questions, FB_mode, show = False, save = False):
     categories = ['Strongly agree', 'Agree', 'No opinion', 'Disagree', 'Strongly disagree']
     bar_width = 0.25
     x_positions_st = np.arange(len(categories))
@@ -66,14 +66,13 @@ def SUS (df_q, n_questions, FB_mode):
         plt.bar(x_positions_apf, values_APF, width=bar_width, color='indigo', label='APF')
 
         plt.xticks(x_positions_st + bar_width, categories)
-        plt.xlabel('Categories')
-        plt.ylabel('Values')
+        plt.ylabel('Number of subjects', fontsize = 16)
         plt.title(f'{FB_mode} SUS Q{i + 1}, n = {len(df_q)}')
         plt.legend()
-        #plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\{FB_mode}_SUS_Q{i+1}')
-
-        #plt.show()
-
+        if save:
+            plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\{FB_mode}_SUS_Q{i+1}')
+        if show:
+            plt.show()
     # SUS scores per subject, already calculated in csv file -> SUS tot
     # Calculation of total score: 2.5*sum(all_Q_scores_indiv)
     #                   for Q1,Q2,Q3,Q5,Q6,Q8: 5-score -> if score is given out from 0 (strongly agree) to 4 (strongly disagree))
@@ -88,95 +87,49 @@ def clean_df (df_q, n, excl = []):
     else:
         return df_q[0:n]
 
-n_hFB = 20 #number of subjects hFB
-n_vFB = 24 #number of subjects vFB
+def plot_singleTLX(FB_mode, TLX, q, save=False, show=False):
+    a = 0.8  # transparency of color = alpha
+    f = 16  # fontsize, ticks and legend
+    t = 18  # fontsize, title
 
-hFB_path = r"C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data\Questionnaire_subjects.csv"
-df_hFB = pd.read_csv(hFB_path, delimiter = ';') #dataframe with all subjects SUS&TLX
-df_hFB = clean_df(df_hFB, n_hFB)
+    fig, ax = plt.subplots(figsize=(11, 8), subplot_kw=dict(polar=True))
+    ax.fill(TLX[0], TLX[1], color='orchid', alpha=a, label='ST' + f", mean = {round(q['ST TLX raw'].mean())}")
+    ax.fill(TLX[0], TLX[3], color='lightblue', alpha=a, label='APF' + f", mean = {round(q['APF TLX raw'].mean())}")
+    ax.fill(TLX[0], TLX[2], color='burlywood', alpha=a, label='POF' + f", mean = {round(q['POF TLX raw'].mean())}")
+    plt.title(f"TLX {FB_mode}, n = {len(q)}")
+    ax.set_xticks(TLX[0][:-1])
+    ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'])
+    plt.xticks(fontsize=f)
+    plt.yticks(fontsize=f)
+    plt.legend(loc=(0.88, 0.75), fontsize=f)
+    if save:
+        plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\{FB_mode}_TLX_STvsPOFvsAPF')
+    if show:
+        plt.show()
+def plot_comparisonTLX(FB_param, TLX_h, TLX_v, save=False, show=False):
+    a = 0.8  # transparency of color = alpha
+    f = 16  # fontsize, ticks and legend
+    t = 18  # fontsize, title
+    if FB_param == 'ST':
+        index = 1
+    elif FB_param == 'POF':
+        index = 2
+    elif FB_param == 'APF':
+        index = 3
+    else:
+        print('Error: FB param not known')
 
-vFB_path = r"C:\Users\User\Documents\CEFIR_LLUI\Visual FB\Data\Questionnaire_subjects_vFB.csv"
-df_vFB = pd.read_csv(vFB_path, delimiter = ';') #dataframe with all subjects SUS&TLX
-df_vFB = clean_df(df_vFB, n_vFB, excl=["S2", "S3", "S6", "S12"])
+    fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
+    ax.fill(TLX_h[0], TLX_h[index], color='orchid', alpha=a, label='hFB')
+    ax.fill(TLX_v[0], TLX_v[index], color='burlywood', alpha=a, label='vFB')
+    plt.title(f"TLX {FB_param}", fontsize=t)
+    ax.set_xticks(TLX_v[0][:-1])
+    ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'])
+    plt.xticks(fontsize=f)
+    plt.yticks(fontsize=f)
+    plt.legend(loc=(0.88, 0.75), fontsize=f)
+    if save:
+        plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_{FB_param}')
+    if show:
+        plt.show()
 
-# SUS (1 bar plot per question -> 8 plots)
-SUS_n = 8 #number of questions for SUS
-
-SUS(df_hFB, SUS_n, 'hFB')
-SUS(df_vFB, SUS_n, 'vFB')
-
-# TLX (input score for each task and each subject under respective header)
-TLX_hFB = TLX(df_hFB)
-TLX_vFB = TLX(df_vFB)
-
-# plotting settings TLX
-
-a = 0.8 #transparency of color = alpha
-f = 16 #fontsize, ticks and legend
-t = 18 #fontsize, title
-
-# Plot ST, POF and APF for hFB and vFB separately
-fig, ax = plt.subplots(figsize=(11, 8), subplot_kw=dict(polar=True))
-ax.fill(TLX_hFB[0], TLX_hFB[1], color='orchid', alpha=a, label = 'ST' + f", mean = {round(df_vFB['ST TLX raw'].mean())}")
-ax.fill(TLX_hFB[0], TLX_hFB[3], color='lightblue', alpha=a, label = 'APF' + f", mean = {round(df_vFB['APF TLX raw'].mean())}")
-ax.fill(TLX_hFB[0], TLX_hFB[2], color='burlywood', alpha=a, label = 'POF' + f", mean = {round(df_vFB['POF TLX raw'].mean())}")
-plt.title(f"TLX hFB, n = {len(df_hFB)}")
-ax.set_xticks(TLX_hFB[0][:-1])
-ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'])
-plt.xticks(fontsize = f)
-plt.yticks(fontsize = f)
-plt.legend(loc = (0.88,0.75), fontsize = f)
-#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\hFB_TLX_STvsPOFvsAPF')
-#plt.show()
-
-fig, ax = plt.subplots(figsize=(11, 8), subplot_kw=dict(polar=True))
-ax.fill(TLX_vFB[0], TLX_vFB[1], color='orchid', alpha=a, label = 'ST' + f", mean = {round(df_vFB['ST TLX raw'].mean())}")
-ax.fill(TLX_vFB[0], TLX_vFB[3], color='lightblue', alpha=a, label = 'APF' + f", mean = {round(df_vFB['APF TLX raw'].mean())}")
-ax.fill(TLX_vFB[0], TLX_vFB[2], color='burlywood', alpha=a, label = 'POF' + f", mean = {round(df_vFB['POF TLX raw'].mean())}")
-plt.title(f"TLX vFB, n = {len(df_vFB)}", fontsize = t)
-ax.set_xticks(TLX_vFB[0][:-1])
-ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'])
-plt.xticks(fontsize = f)
-plt.yticks(fontsize = f)
-plt.legend(loc = (0.88,0.75), fontsize = f)
-#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\vFB_TLX_STvsPOFvsAPF')
-#plt.show()
-
-# Plot the spiderweb graph ST
-fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
-ax.fill(TLX_hFB[0], TLX_hFB[1], color='orchid', alpha=a, label = 'hFB')
-ax.fill(TLX_vFB[0], TLX_vFB[1], color='burlywood', alpha=a, label = 'vFB')
-plt.title(f"TLX ST", fontsize = t)
-ax.set_xticks(TLX_vFB[0][:-1])
-ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'])
-plt.xticks(fontsize = f)
-plt.yticks(fontsize = f)
-plt.legend(loc = (0.88,0.75), fontsize = f)
-#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_ST')
-#plt.show()
-
-# Plot the spiderweb graph POF
-fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
-ax.fill(TLX_hFB[0], TLX_hFB[2], color='orchid', alpha=a, label = 'hFB')
-ax.fill(TLX_vFB[0], TLX_vFB[2], color='burlywood', alpha=a, label = 'vFB')
-plt.title(f"TLX POF", fontsize = t)
-ax.set_xticks(TLX_vFB[0][:-1])
-ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'])
-plt.xticks(fontsize = f)
-plt.yticks(fontsize = f)
-plt.legend(loc = (0.88,0.75), fontsize = f)
-#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_POF')
-#plt.show()
-
-# Plot the spiderweb graph APF
-fig, ax = plt.subplots(figsize=(8, 8), subplot_kw=dict(polar=True))
-ax.fill(TLX_hFB[0], TLX_hFB[3], color='orchid', alpha=a, label = 'hFB')
-ax.fill(TLX_vFB[0], TLX_vFB[3], color='burlywood', alpha=a, label = 'vFB')
-plt.title(f"TLX APF", fontsize = t)
-ax.set_xticks(TLX_vFB[0][:-1])
-ax.set_xticklabels(['Mental', 'Physical', 'Temporal', 'Performance', 'Effort', 'Frustration'])
-plt.xticks(fontsize = f)
-plt.yticks(fontsize = f)
-plt.legend(loc = (0.88,0.75), fontsize = f)
-#plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Questionnaires\TLX_APF')
-#plt.show()

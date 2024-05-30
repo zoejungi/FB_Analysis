@@ -1,6 +1,6 @@
 #helperfunctions for main or for functions
 import copy
-
+import math
 import pandas as pd
 import os
 
@@ -12,15 +12,16 @@ def get_filepath (datapath, sub_id, FB, param):
             if sub_id in sub_folder:
                 sub_path = os.path.join(dflow_path, sub_folder)
                 break
-                print(sub_path)
         if os.path.exists(sub_path) and os.path.isdir(sub_path):
-            print('sub_path exists')
             for file in os.listdir(sub_path):
                 if FB.lower() in file.lower() and 'HBM2' in file:
                     filepath = os.path.join(sub_path, file)
                     break
+                else:
+                    filepath = []
         else:
             print(f'Error: {param} filepath for {sub_id} during FB targeting {FB} not found')
+            filepath = []
 
     elif param == 'spatiotemp' or param == 'ST': # includes ST, step length, swing time, step height, step width etc
         # take spatiotemp data in analysis folder
@@ -28,16 +29,17 @@ def get_filepath (datapath, sub_id, FB, param):
         for sub_folder in os.listdir(ana_path):
             if sub_id in sub_folder:
                 sub_path = os.path.join(ana_path, sub_folder)
-                print(sub_path)
                 break
         if os.path.exists(sub_path) and os.path.isdir(sub_path):
-            print('sub_path exists')
             for file in os.listdir(sub_path):
                 if FB.lower() in file.lower() and 'spatiotemp' in file.lower():
                     filepath = os.path.join(sub_path, file)
                     break
+                else:
+                    filepath = []
         else:
             print(f'Error: {param} filepath for {sub_id} during FB targeting {FB} not found')
+            filepath = []
 
     else:
         # go to extraction_normalization folder
@@ -46,19 +48,21 @@ def get_filepath (datapath, sub_id, FB, param):
             if sub_id in sub_folder:
                 sub_path = os.path.join(extr_path, sub_folder)
                 break
-                print(sub_path)
         if os.path.exists(sub_path) and os.path.isdir(sub_path):
-            print('sub_path exists')
             for out_folder in os.listdir(sub_path):
                 if FB.lower() in out_folder.lower():
                     out_path = os.path.join(sub_path, out_folder)
                     break
-                    print(out_path)
         if os.path.exists(out_path) and os.path.isdir(out_path):
-            print('out_path exists')
             for file in os.listdir(out_path):
                 if FB.lower() in file.lower() and param.lower() in file.lower():
                     filepath = os.path.join(out_path, file)
+                else:
+                    filepath = []
+        else:
+            print(f'Error: {param} filepath for {sub_id} during FB targeting {FB} not found')
+            filepath = []
+
     return filepath
 
 def convert_txt_to_csv (input_path, separator = ','):
@@ -180,5 +184,24 @@ def exclude_outliers(df):
         df['gait_cycle_left'][i] = [g_c for j, g_c in enumerate(df['gait_cycle_left'][i]) if j not in indices_to_drop]
         df['gait_cycle_right'][i] = [g_c for j, g_c in enumerate(df['gait_cycle_right'][i]) if j not in indices_to_drop]
 
+def print_in_excel_table(value, sheet_name, row_header, column_header, output_file):
+    # Read the Excel file into a DataFrame
+    df = pd.read_excel(output_file, sheet_name=sheet_name, index_col=0)
+    # Find the row and column index based on the row and column headers
+    try:
+        row_index = df.index.get_loc(row_header)
+    except KeyError:
+        print(f"Row header '{row_header}' not found.")
+        return
+    try:
+        column_index = df.columns.get_loc(column_header)
+    except KeyError:
+        print(f"Column header '{column_header}' not found.")
+        return
 
-#get_filepath(r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\Data', 'S1_', FB = 'POF', param = 'APF')
+    # Set value in specific cell
+    df.iloc[row_index, column_index] = value
+
+    # Write DataFrame back to Excel file
+    df.to_excel(output_file, sheet_name=sheet_name)
+

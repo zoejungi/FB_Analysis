@@ -3,88 +3,10 @@
 
 import numpy as np
 from helperfunctions import *
-import matplotlib.pyplot as plt
-
-class Plotting:
-    def __init__(self):
-        self.xticks = 14 #fontsize xticks labels
-        self.t = 18 #fontsize, title
-        self.a = 0.8 #transparency of color = alpha
-        self.f = 16 #fontsize, ticks and legend
-
-    def plot_leftvsright(self, time, left, right, ylabel, title = [], save = False, show = False, savingname = []):
-        plt.figure()
-        plt.plot(time, left, label='Left', linewidth=1, linestyle='-', color='red')
-        plt.plot(time, right, label='Right', linewidth=1, linestyle='-', color='royalblue')
-        ax = plt.subplot()
-        ax.set_xlim(time.iloc[1], time.iloc[-1])
-        xticks = [time.iloc[1], 60, 240, 300, 480]
-        ax.set_xticks(xticks)  # only set ticks every second location, starting with first location
-        ax.set_xticklabels([''] * len(xticks))  # Set empty labels
-        for tick in xticks[:]:
-            ax.axvline(x=tick, color='lightgray', linestyle='dotted', alpha=0.7)
-        # Define the labels
-        labels = ['NW', 'FB1', 'No FB1', 'FB2', 'No FB2']
-        # Define positions for the labels
-        label_positions = [(time.iloc[1] + 60) / 2, (60 + 240) / 2, (240 + 300) / 2, (300 + 480) / 2, (480 + 640) / 2]
-        # Add labels at the specified positions
-        for pos, label in zip(label_positions, labels):
-            ax.text(pos, ax.get_ylim()[0] - 0.05 * (ax.get_ylim()[1] - ax.get_ylim()[0]), label, ha='center', va='top',
-                    fontsize=self.xticks)
-        # Adjust the plot to make sure labels fit well
-        plt.subplots_adjust(bottom=0.2)
-        plt.ylabel(ylabel, fontsize= self.f)
-        plt.xticks(fontsize=self.f)
-        plt.yticks(fontsize=self.f)
-        plt.legend(loc='upper right', fontsize=self.f)
-        if title:
-            plt.title(title, fontsize = self.t)
-        if save:
-            plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Indiv\{savingname}')
-        if show:
-            plt.show()
-    def plot_SR (self, x, y, label, save = False, show = False, title = [], color = 'm', baseline = True, savingname = []):
-        plt.figure()
-        plt.plot(x, y, marker='', markersize=4, linewidth=1, linestyle='-', color=color, label=label)
-        plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label='Target Value')
-        plt.axhline(y=1, color='lightgrey', linestyle='-', linewidth=1)
-        plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2, label='Margin zone')
-        ax = plt.subplot()
-        ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
-        ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
-        ax.set_xlim(x.iloc[1], x.iloc[-1])
-        ax.set_ylim(0.7,1.1)
-
-        xticks = [x.iloc[1], 60, 240, 300,480]
-        ax.set_xticks(xticks)  # only set ticks every second location, starting with first location
-        ax.set_xticklabels([''] * len(xticks))  # Set empty labels
-        for tick in xticks[:]:
-            ax.axvline(x=tick, color='lightgray', linestyle='dotted', alpha=0.7)
-        # Define the labels
-        labels = ['NW', 'FB1', 'No FB1', 'FB2', 'No FB2']
-        # Define positions for the labels
-        label_positions = [(x.iloc[1] + 60) / 2, (60 + 240) / 2, (240 + 300) / 2, (300 + 480) / 2, (480 + 640) / 2]
-        # Add labels at the specified positions
-        for pos, label in zip(label_positions, labels):
-            ax.text(pos, ax.get_ylim()[0] - 0.05 * (ax.get_ylim()[1] - ax.get_ylim()[0]), label, ha='center', va='top', fontsize=self.xticks)
-        # Adjust the plot to make sure labels fit well
-        plt.subplots_adjust(bottom=0.2)
-        if baseline:
-            plt.ylabel('Baseline SR [%]', fontsize = self.f)
-        else:
-            plt.ylabel('NW SR [%]', fontsize=self.f)
-        plt.xticks(fontsize = self.f)
-        plt.yticks(fontsize = self.f)
-        plt.legend(loc='upper right', fontsize = self.f)
-        if title:
-            plt.title(title, fontsize = self.t)
-        if save:
-            plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Indiv\{savingname}')
-        if show:
-            plt.show()
+from Plotting import *
 
 class Subject (Plotting):
-    def __init__(self, sub_id, study, input_data): #if study = "FB" then subject from FB study -> param include df from all three FB trials
+    def __init__(self, sub_id, study, input_data, params_excl=[]): #if study = "FB" then subject from FB study -> param include df from all three FB trials
         super().__init__()
         self.ID = sub_id
         self.study = study
@@ -93,7 +15,7 @@ class Subject (Plotting):
         df = pd.read_excel(os.path.join(input_data, 'Data_subjects.xlsx'), index_col=None) # Read the Excel file
         filtered_df = df[df.iloc[:, 0].str.contains(sub_id, na=False)] # Filter rows for subject specific infos (first column = sub_ids)
         self.infos = pd.concat([df.iloc[:1], filtered_df]) # Combine headers and filtered rows
-
+        self.params_excl = params_excl #list of parameters for which they are excluded (APF, ST or POF FB)
     def ST(self):
         # input = self
         # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, stance_duration_p_left/right,
@@ -101,17 +23,21 @@ class Subject (Plotting):
         if self.study == "hFB" or "vFB":
             # datasets with only columns of interest for all three FB modes
             df_res = []
-            data_paths = [get_filepath(datapath = self.datapath, sub_id = self.ID, FB = "ST", param = "ST"), get_filepath(datapath = self.datapath, sub_id = self.ID, FB = "POF", param = "ST"), get_filepath(datapath = self.datapath, sub_id = self.ID, FB = "APF", param = "ST")]
+            data_paths = [get_filepath(datapath = self.datapath, sub_id = self.ID, FB = "ST", param = "ST"),
+                          get_filepath(datapath = self.datapath, sub_id = self.ID, FB = "POF", param = "ST"),
+                          get_filepath(datapath = self.datapath, sub_id = self.ID, FB = "APF", param = "ST")]
+
             for path in data_paths:
                 if '.txt' in path:
                     path = convert_txt_to_csv(path)
 
             for i, file_path in enumerate(data_paths):
-                df = pd.read_csv(file_path)
-                df.rename(columns={'Unnamed: 0':'cycle_number'}, inplace=True )
-                df = df.loc[2:, ['cycle_number', 'stance_duration_p_left', 'cycle_duration_s_left', 'stance_duration_p_right', 'cycle_duration_s_right']]  # only parameters of interest
-                df = df.apply(pd.to_numeric)  # whole dataframe from str to num
-                df_res.append(df)
+                if file_path:
+                    df = pd.read_csv(file_path)
+                    df.rename(columns={'Unnamed: 0':'cycle_number'}, inplace=True )
+                    df = df.loc[2:, ['cycle_number', 'stance_duration_p_left', 'cycle_duration_s_left', 'stance_duration_p_right', 'cycle_duration_s_right']]  # only parameters of interest
+                    df = df.apply(pd.to_numeric)  # whole dataframe from str to num
+                    df_res.append(df)
 
             # used to get the time
             df_time = []
@@ -123,31 +49,27 @@ class Subject (Plotting):
                 df = pd.read_csv(file_path)
                 df = df.apply(pd.to_numeric)  # whole dataframe from str to num
                 df_time.append(df)
+
+            # Computing metrics: ST left and ST right [s]
+            for i, df in enumerate(df_res):
+                df_res[i]['ST_left'] = df_res[i]['stance_duration_p_left'] * df_res[i]['cycle_duration_s_left']
+                df_res[i]['ST_right'] = df_res[i]['stance_duration_p_right'] * df_res[i]['cycle_duration_s_right']
+                df_res[i].reset_index(inplace=True)
+                df_res[i]['time'] = df_time[i]["end_frame"] * 0.01  # 0.01 = sampling time of Vicon
+                df_res[i].set_index('index', inplace=True, drop=True)
+
+            # SR value computed by dflow during the baseline reported in subinfos
+            baseline_sr = np.squeeze(self.infos['BSR ST'])
+            for i, df in enumerate(df_res):
+                df_res[i]['SR_raw'] = df_res[i]['ST_left'] / df_res[i]['ST_right']  # raw symmetry ratio
+                df_res[i]['SR'] = df_res[i]['SR_raw'] / baseline_sr  # SR in proportion of baseline SR
+                # Averaging with window = 5, taking SR and not SR_raw
+                df_res[i]['SR_SMA5'] = df_res[i]['SR'].rolling(window=5, min_periods=1).mean()
+                df_res[i]['ST_left_SMA5'] = df_res[i]['ST_left'].rolling(window=5, min_periods=1).mean()
+                df_res[i]['ST_right_SMA5'] = df_res[i]['ST_right'].rolling(window=5, min_periods=1).mean()
         else:
-            # only one dataset instead of 3
-            print("Error: not FB study and no other study defined yet")
-
-        # Computing metrics: ST left and ST right [s]
-        for i, df in enumerate(df_res):
-            df_res[i]['ST_left'] = df_res[i]['stance_duration_p_left']*df_res[i]['cycle_duration_s_left']
-            df_res[i]['ST_right'] = df_res[i]['stance_duration_p_right']*df_res[i]['cycle_duration_s_right']
-
-        #time
-        for i, df in enumerate(df_res):
-            df_res[i].reset_index(inplace=True)
-            df_res[i]['time'] = df_time[i]["end_frame"] * 0.01 # 0.01 = sampling time of Vicon
-            df_res[i].set_index('index', inplace=True, drop=True)
-
-        # SR value computed by dflow during the baseline reported in subinfos
-        baseline_sr = np.squeeze(self.infos['BSR ST'])
-        for i, df in enumerate(df_res):
-            df_res[i]['SR_raw'] = df_res[i]['ST_left']/df_res[i]['ST_right'] # raw symmetry ratio
-            df_res[i]['SR'] = df_res[i]['SR_raw']/baseline_sr # SR in proportion of baseline SR
-            print(df_res[i]['ST_right'].isna().any())
-            # Averaging with window = 5, taking SR and not SR_raw
-            df_res[i]['SR_SMA5'] = df_res[i]['SR'].rolling(window=5,min_periods=1).mean()
-            df_res[i]['ST_left_SMA5'] = df_res[i]['ST_left'].rolling(window=5,min_periods=1).mean()
-            df_res[i]['ST_right_SMA5'] = df_res[i]['ST_right'].rolling(window=5,min_periods=1).mean()
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for ST")
+            df_res = []
 
         return df_res
 
@@ -190,20 +112,23 @@ class Subject (Plotting):
                 df['time'] = df_left[i]["end_frame"] * 0.01  # 0.01 = vicon sampling time
 
                 df_right.append(df)
+
+            # SR value computed by dflow during the baseline reported in subinfos
+            baseline_sr = self.infos['BSR POF']
+            print(baseline_sr)
+            # storing SR in df_left
+            for i, df in enumerate(df_left):
+                df_left[i]['SR_raw'] = df_left[i]['POF'] / df_right[i]['POF']
+                df_left[i]['SR'] = df_left[i]['SR_raw'] / baseline_sr
+                # Average with window = 5, using SR not SR_raw
+                df_left[i]['SR_SMA5'] = df_left[i]['SR'].rolling(window=5, min_periods=1).mean()
+                df_left[i]['POF_left_SMA5'] = df_left[i]['POF'].rolling(window=5, min_periods=1).mean()
+                df_left[i]['POF_right_SMA5'] = df_right[i]['POF'].rolling(window=5, min_periods=1).mean()
         else:
             # only one dataset instead of 3
-            print("Error: not FB study and no other study defined yet")
-        # SR value computed by dflow during the baseline reported in subinfos
-        baseline_sr = self.infos['BSR POF']
-        print(baseline_sr)
-        # storing SR in df_left
-        for i, df in enumerate(df_left):
-            df_left[i]['SR_raw'] = df_left[i]['POF']/df_right[i]['POF']
-            df_left[i]['SR'] = df_left[i]['SR_raw']/baseline_sr
-            # Average with window = 5, using SR not SR_raw
-            df_left[i]['SR_SMA5'] = df_left[i]['SR'].rolling(window=5,min_periods=1).mean()
-            df_left[i]['POF_left_SMA5'] = df_left[i]['POF'].rolling(window=5,min_periods=1).mean()
-            df_left[i]['POF_right_SMA5'] = df_right[i]['POF'].rolling(window=5,min_periods=1).mean()
+            df_left = []
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for POF")
+
         return df_left
 
     def maxAPF(self):
@@ -259,6 +184,9 @@ class Subject (Plotting):
                     print("Error: there's at least one event missing in either foot after excluding the ouliers")
             else:
                 print("Error: there's at least one event missing in either foot")
+        else:
+            df_apf_final = []
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for APF")
 
         return df_apf_final
 
@@ -327,6 +255,10 @@ class Subject (Plotting):
                 df_knee[i]['knee_right_SMA5'] = df_knee_right[i]['knee_flexion'].rolling(window=5,min_periods=1).mean()
                 df_knee[i]['time'] = df_knee_left[i]['time']
 
+        else:
+            df_knee = []
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for kneeflexion")
+
         return df_knee
     def meanGRFz(self):
         if self.study == "hFB" or "vFB":
@@ -392,6 +324,10 @@ class Subject (Plotting):
                 df_GRF[i]['GRFz_right_SMA5'] = df_GRF_right[i]['meanGRFz'].rolling(window=5,min_periods=1).mean()
                 df_GRF[i]['time'] = df_GRF_left[i]['time']
 
+        else:
+            df_GRF = []
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for GRF")
+
         return df_GRF
     def swingTime(self):
 
@@ -441,6 +377,10 @@ class Subject (Plotting):
                 df_swing[i]['swingtime_left_SMA5'] = df_swing[i]['swingtime_left'].rolling(window=5, min_periods=1).mean()
                 df_swing[i]['swingtime_right_SMA5'] = df_swing[i]['swingtime_right'].rolling(window=5, min_periods=1).mean()
 
+        else:
+            df_swing = []
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for swingtime")
+
         return df_swing
     def stepLength(self):
 
@@ -486,6 +426,10 @@ class Subject (Plotting):
                 df_step[i]['SR_SMA5'] = df_step[i]['SR'].rolling(window=5, min_periods=1).mean()
                 df_step[i]['steplength_left_SMA5'] = df_step[i]['step_length_left'].rolling(window=5, min_periods=1).mean()
                 df_step[i]['steplength_right_SMA5'] = df_step[i]['step_length_right'].rolling(window=5, min_periods=1).mean()
+
+        else:
+            df_step = []
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for steplength")
 
         return df_step
     def stepHeight(self):
@@ -534,6 +478,10 @@ class Subject (Plotting):
                 df_step[i]['stepheight_left_SMA5'] = df_step[i]['step_height_left'].rolling(window=5, min_periods=1).mean()
                 df_step[i]['stepheight_right_SMA5'] = df_step[i]['step_height_right'].rolling(window=5, min_periods=1).mean()
 
+        else:
+            df_step = []
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for stepheight")
+
         return df_step
     def stepWidth(self):
 
@@ -581,11 +529,14 @@ class Subject (Plotting):
                 df_step[i]['stepwidth_left_SMA5'] = df_step[i]['step_width_left'].rolling(window=5, min_periods=1).mean()
                 df_step[i]['stepwidth_right_SMA5'] = df_step[i]['step_width_right'].rolling(window=5, min_periods=1).mean()
 
+        else:
+            df_step = []
+            print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for stepwidth")
+
         return df_step
 
+#testing for the moment (before using main)
 
-
-#create all subjects and calculate all gait parameters for all
 n_hFB = 20
 n_vFB = 24
 subjects_hFB = {}
@@ -595,40 +546,19 @@ for i in range(1, n_hFB+1):
     subjects_hFB[f'S{i}'] = Subject(f'S{i}_', "hFB", r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data')
 print('dictionary subjects hFB created')
 
-subjects_hFB['S1'].swing = subjects_hFB['S1'].stepHeight()
-
-for i, df in enumerate(subjects_hFB['S1'].swing):
-    subjects_hFB['S1'].plot_SR(subjects_hFB['S1'].swing[i]['time'], subjects_hFB['S1'].swing[i]['SR_SMA5'], label='SR$_{Swingtime}$', show = True, baseline=False)
-    subjects_hFB['S1'].plot_leftvsright(subjects_hFB['S1'].swing[i]['time'], subjects_hFB['S1'].swing[i]['stepheight_left_SMA5'], subjects_hFB['S1'].swing[i]['stepheight_right_SMA5'], ylabel='Swingtime [s]',
-                               show=True)
-
-
-#f'S{i}'.max_apf = maxAPF() # max_APF = array of APF_l, t_l, APF_r, t_r -> same number and anatomically impossible values excluded
-    #subjects_hFB[f'S{i}'].pof = subjects_hFB[f'S{i}'].POF()
-    #subjects_hFB[f'S{i}'].st = ST()
-    #f'S{i}'.max_kneeflexion = maxKneeflexion(exclusion = True)
-    #f'S{i}'.mean_grfz = meanGRFz(exclusion = True)
-    #f'S{i}'.step_length = stepLength(exclusion = True)
-    #f'S{i}'.step_height = stepHeight(exclusion = True)
-    #f'S{i}'.step_width = stepWidth(exclusion = True)
-    #f'S{i}'.swingtime = swingTime(exclusion = True)
-
 for i in range(1, n_vFB+1):
     subjects_vFB[f'S{i}'] = Subject(f'S{i}_', "vFB", r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\Data')
-    #f'S{i}'.max_apf = maxAPF() # max_APF = array of APF_l, t_l, APF_r, t_r -> same number and anatomically impossible values excluded
-    #subjects_vFB[f'S{i}'].pof = POF()
-    #subjects_vFB[f'S{i}'].st = ST()
-    #f'S{i}'.max_kneeflexion = maxKneeflexion(exclusion = True)
-    #f'S{i}'.mean_grfz = meanGRFz(exclusion = True)
-    #f'S{i}'.step_length = stepLength(exclusion = True)
-    #f'S{i}'.step_height = stepHeight(exclusion = True)
-    #f'S{i}'.step_width = stepWidth(exclusion = True)
-    #f'S{i}'.swingtime = swingTime(exclusion = True)
+print('dictionary subjects vFB created')
 
-# plot individuals
+subjects_hFB[f'S1'].apf = subjects_hFB[f'S1'].maxAPF()
+#subjects_vFB[f'S12'].st = subjects_vFB[f'S12'].ST()
 
-# calculate means
 
-# plot all
+
+#for j, df in enumerate(subjects_vFB[f'S12'].st):
+ #   subjects_vFB[f'S12'].plot_SR(subjects_vFB[f'S12'].st[j]['time'], subjects_vFB[f'S12'].st[j]['SR_SMA5'],
+  #                                label='SR$_{ST}$', show = True)
+   # subjects_vFB[f'S12'].plot_leftvsright(subjects_vFB[f'S12'].st[j]['time'], subjects_vFB[f'S12'].st[j]['ST_left'],
+    #                                       subjects_vFB[f'S12'].st[j]['ST_right'], ylabel='ST [s]', show = True)
 
 

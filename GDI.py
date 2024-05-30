@@ -2,26 +2,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-def print_in_excel_table(value, sheet_name, row_header, column_header, output_file):
-    # Read the Excel file into a DataFrame
-    df = pd.read_excel(output_file, sheet_name=sheet_name, index_col=0)
-    # Find the row and column index based on the row and column headers
-    try:
-        row_index = df.index.get_loc(row_header)
-    except KeyError:
-        print(f"Row header '{row_header}' not found.")
-        return
-    try:
-        column_index = df.columns.get_loc(column_header)
-    except KeyError:
-        print(f"Column header '{column_header}' not found.")
-        return
+from helperfunctions import print_in_excel_table
 
-    # Set value in specific cell
-    df.iloc[row_index, column_index] = value
-
-    # Write DataFrame back to Excel file
-    df.to_excel(output_file, sheet_name=sheet_name)
 def get_data(data_use, FB_param, input_path, excl=[]):
     if data_use == "GDI":
         parameters_subpaths = [
@@ -186,7 +168,7 @@ def calculate_g(use, df_left_hip_ad, df_left_pelvis_tilt, df_left_pelvis_obl, df
                 g = np.concatenate(g, axis=0)
                 G.append(g)
         return np.array(G)
-def GDI (input_path, FB_mode, FB_param, output_file, excl=[], plot = False):
+def GDI (input_path, FB_mode, FB_param, output_file, excl=[], plot = False, save = False):
 
 # input:    input_path to extraction_normalization files, where we have out_st, out_apf, out_pof
 #           excl = list of excl subjects; e.g. ["S1", "S4"]
@@ -300,15 +282,6 @@ def GDI (input_path, FB_mode, FB_param, output_file, excl=[], plot = False):
         plt.yticks(fontsize=16)
         plt.xticks(fontsize=16)
         plt.title(f'{FB_mode}', fontsize = 20)
-        plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\GDI\{FB_mode}_{FB_param}.png')
+        if save:
+            plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\GDI\{FB_mode}_{FB_param}.png')
         plt.show()
-
-hFB_path = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data\extraction_normalization'
-vFB_path = r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\Data\extraction_normalization'
-
-GDI(hFB_path, "hFB", "ST", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx")
-GDI(hFB_path, "hFB", "APF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx")
-GDI(hFB_path, "hFB", "POF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx")
-GDI(vFB_path, "vFB", "ST", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"])
-GDI(vFB_path, "vFB", "APF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"])
-GDI(vFB_path, "vFB", "POF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"])

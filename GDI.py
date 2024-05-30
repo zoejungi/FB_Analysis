@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-def print_in_excel_table(GDI_value, sheet_name, row_header, column_header, output_file):
+def print_in_excel_table(value, sheet_name, row_header, column_header, output_file):
     # Read the Excel file into a DataFrame
     df = pd.read_excel(output_file, sheet_name=sheet_name, index_col=0)
     # Find the row and column index based on the row and column headers
@@ -18,7 +18,7 @@ def print_in_excel_table(GDI_value, sheet_name, row_header, column_header, outpu
         return
 
     # Set value in specific cell
-    df.iloc[row_index, column_index] = GDI_value
+    df.iloc[row_index, column_index] = value
 
     # Write DataFrame back to Excel file
     df.to_excel(output_file, sheet_name=sheet_name)

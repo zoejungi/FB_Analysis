@@ -39,7 +39,8 @@ class Plotting:
             plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Indiv\{savingname}')
         if show:
             plt.show()
-    def plot_SR (self, x, y, label, save = False, show = False, title = [], color = 'm', baseline = True, savingname = []):
+    @classmethod
+    def plot_SR (cls, x, y, label, show = False, title = [], color = 'm', baseline = True, savingname = []):
         plt.figure()
         plt.plot(x, y, marker='', markersize=4, linewidth=1, linestyle='-', color=color, label=label)
         plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label='Target Value')
@@ -74,7 +75,7 @@ class Plotting:
         plt.legend(loc='upper right', fontsize = self.f)
         if title:
             plt.title(title, fontsize = self.t)
-        if save:
+        if savingname:
             plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Indiv\{savingname}')
         if show:
             plt.show()

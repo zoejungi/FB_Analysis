@@ -68,15 +68,16 @@ for i in range(1, n_hFB+1)
 print('gait parameters calculated for all subjects hFB')
 
 or i in range(1, n_vFB+1)
-    subjects_vFB[f'S{i}'].st = subjects_vFB[f'S{i}'].ST()
-    subjects_vFB[f'S{i}'].pof = subjects_vFB[f'S{i}'].POF()
-    #subjects_vFB[f'S{i}'].apf = subjects_vFB[f'S{i}'].maxAPF()
-    subjects_vFB[f'S{i}'].swingtime = subjects_vFB[f'S{i}'].swingTime()
-    subjects_vFB[f'S{i}'].steplength = subjects_vFB[f'S{i}'].stepLength()
-    subjects_vFB[f'S{i}'].stepheight = subjects_vFB[f'S{i}'].stepHeight()
-    subjects_vFB[f'S{i}'].stepwidth = subjects_vFB[f'S{i}'].stepWidth()
-    subjects_vFB[f'S{i}'].GRFz = subjects_vFB[f'S{i}'].meanGRFz()
-    subjects_vFB[f'S{i}'].kneeflexion = subjects_vFB[f'S{i}'].kneeFlexion()
+    if i != 2 or 3 or 4 or 6 or 12:
+        subjects_vFB[f'S{i}'].st = subjects_vFB[f'S{i}'].ST()
+        subjects_vFB[f'S{i}'].pof = subjects_vFB[f'S{i}'].POF()
+        #subjects_vFB[f'S{i}'].apf = subjects_vFB[f'S{i}'].maxAPF()
+        subjects_vFB[f'S{i}'].swingtime = subjects_vFB[f'S{i}'].swingTime()
+        subjects_vFB[f'S{i}'].steplength = subjects_vFB[f'S{i}'].stepLength()
+        subjects_vFB[f'S{i}'].stepheight = subjects_vFB[f'S{i}'].stepHeight()
+        subjects_vFB[f'S{i}'].stepwidth = subjects_vFB[f'S{i}'].stepWidth()
+        subjects_vFB[f'S{i}'].GRFz = subjects_vFB[f'S{i}'].meanGRFz()
+        subjects_vFB[f'S{i}'].kneeflexion = subjects_vFB[f'S{i}'].kneeFlexion()
 print('gait parameters calculated for all subjects vFB')
 
 # plot all individuals
@@ -157,13 +158,6 @@ for i in range(1, vFB+1):
         subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].kneeflexion[j]['time'], subjects_vFB[f'S{i}'].kneeflexion[j]['SR_SMA5'], label='SR$_{max Kneeflexion}$', baseline=False)
         subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].kneeflexion[j]['time'], subjects_vFB[f'S{i}'].kneeflexion[j]['knee_left_SMA5'], subjects_vFB[f'S{i}'].kneeflexion[j]['knee_right_SMA5'], ylabel='max Kneeflexion [°]')
 print('all individual plots done for all subjects vFB')
-
-# define excluded subjects (none for hFB, S2/3/6/12 for all, S4 for APF additionally)
-subjects_vFB[f'S2'].params_excl = ['all during all']
-subjects_vFB[f'S3'].params_excl = ['all during all']
-subjects_vFB[f'S6'].params_excl = ['all during all']
-subjects_vFB[f'S12'].params_excl = ['all during all']
-subjects_vFB['S4'].params_excl = ['APF during all'] # no data
 
 # plot all
 

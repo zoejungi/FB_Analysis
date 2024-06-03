@@ -3,6 +3,7 @@ import copy
 import math
 import pandas as pd
 import os
+import numpy as np
 
 def get_filepath (datapath, sub_id, FB, param):
     if param == 'APF':
@@ -17,11 +18,8 @@ def get_filepath (datapath, sub_id, FB, param):
                 if FB.lower() in file.lower() and 'HBM2' in file:
                     filepath = os.path.join(sub_path, file)
                     break
-                else:
-                    filepath = []
         else:
             print(f'Error: {param} filepath for {sub_id} during FB targeting {FB} not found')
-            filepath = []
 
     elif param == 'spatiotemp' or param == 'ST': # includes ST, step length, swing time, step height, step width etc
         # take spatiotemp data in analysis folder
@@ -35,11 +33,8 @@ def get_filepath (datapath, sub_id, FB, param):
                 if FB.lower() in file.lower() and 'spatiotemp' in file.lower():
                     filepath = os.path.join(sub_path, file)
                     break
-                else:
-                    filepath = []
         else:
             print(f'Error: {param} filepath for {sub_id} during FB targeting {FB} not found')
-            filepath = []
 
     else:
         # go to extraction_normalization folder
@@ -57,14 +52,11 @@ def get_filepath (datapath, sub_id, FB, param):
             for file in os.listdir(out_path):
                 if FB.lower() in file.lower() and param.lower() in file.lower():
                     filepath = os.path.join(out_path, file)
-                else:
-                    filepath = []
+                    break
         else:
             print(f'Error: {param} filepath for {sub_id} during FB targeting {FB} not found')
-            filepath = []
 
     return filepath
-
 def convert_txt_to_csv (input_path, separator = ','):
     base, _ = os.path.splitext(input_path)
     output_path = base + '.csv'
@@ -74,12 +66,12 @@ def convert_txt_to_csv (input_path, separator = ','):
     file.to_csv(output_path, index=False)
 
     return output_path
-
-def identify_maxAPF (df_apf):
+def identify_maxAPF (df_apf, sub_id=[], datapath=[]):
     # Identifying max APF
     df_final = []
     for i, df in enumerate(df_apf):
 
+        group_id = i
         apf_left_i = []
         apf_right_i = []
         time_i = []
@@ -115,16 +107,14 @@ def identify_maxAPF (df_apf):
                         # time_apf_i.append()
                         real_time_max_apf_left_i.append(float(time_left_max_apf))
                         # gait_cycle_left_i.append(max(df_apf[i].loc[min_index_left, "LHS"], df_apf[i].loc[min_index_left, "RHS"])) # if you want gait cycle depending of wich foot the subject move first
-                        gait_cycle_left_i.append(df_apf[i].loc[
-                                                     min_index_left, "LHS"])  # gait cycle for left foot # I use this one because this is what we did for the other parameters in the other notebook
+                        gait_cycle_left_i.append(df_apf[i].loc[min_index_left, "LHS"])  # gait cycle for left foot # I use this one because this is what we did for the other parameters in the other notebook
 
                 if lto > prev_lto:
 
                     lto_mask = df_apf[i]["LTO"] == lto  # right mid stance phase start
                     rto_mask = df_apf[i]["RTO"] == rto
                     last_rto_index = df_apf[i][rto_mask].index[-1]
-                    next_30_rows_mask_right = (df_apf[i].index > last_rto_index) & (
-                                df_apf[i].index <= last_rto_index + 30)
+                    next_30_rows_mask_right = (df_apf[i].index > last_rto_index) & (df_apf[i].index <= last_rto_index + 30)
                     mask_right = lto_mask & next_30_rows_mask_right
 
                     right_max_apf = df_apf[i].loc[mask_right, "RAPF.Offset"].min()
@@ -140,49 +130,60 @@ def identify_maxAPF (df_apf):
                 prev_rto = rto
                 prev_lto = lto
 
-        time_i = copy.deepcopy(real_time_max_apf_left_i) #-> defined as the time of the max apf for the left foot
+        unique_event_left = [element for element in gait_cycle_left_i if element not in gait_cycle_right_i]
+        unique_event_right = [element for element in gait_cycle_right_i if element not in gait_cycle_left_i]
+
+        if unique_event_right or unique_event_left:
+            for index in range(len(unique_event_right)):
+                ind = gait_cycle_right_i.index(unique_event_right[index])
+                del apf_right_i[ind]
+                del real_time_max_apf_right_i[ind]
+                del gait_cycle_right_i[ind]
+
+            for index in range(len(unique_event_left)):
+                ind = gait_cycle_left_i.index(unique_event_left[index])
+                del apf_left_i[ind]
+                del real_time_max_apf_left_i[ind]
+                del gait_cycle_left_i[ind]
+
         df_final_i = pd.DataFrame({
             'apf_left': apf_left_i,
             'apf_right': apf_right_i,
-            'time': time_i,
+            'time': real_time_max_apf_left_i,
             'real_time_left': real_time_max_apf_left_i,
             'real_time_right': real_time_max_apf_right_i,
             'gait_cycle_left': gait_cycle_left_i,
-            'gait_cycle_right': gait_cycle_right_i
+            'gait_cycle_right': gait_cycle_right_i,
+            'group_id': group_id
         })
         df_final.append(df_final_i)
+    if sub_id and datapath:
+        pd.DataFrame(pd.concat(df_final, ignore_index=True)).to_csv(os.path.join(datapath, f'maxAPF_identified_{sub_id}.csv'), index=False)
     return df_final
 
 def check_cycles (df):
     # to check that no event is missing for one foot and not the other
-    for i in enumerate(df):
-        unique_event_left = [element for element in df['gait_cycle_left'][i] if element not in df['gait_cycle_right'][i]]
-        unique_event_right = [element for element in df['gait_cycle_right'][i] if element not in df['gait_cycle_left'][i]]
-        if unique_event_left or unique_event_right:
+    for i, data in enumerate(df):
+        unique_left = [element for element in df[i]['gait_cycle_left'] if element not in df[i]['gait_cycle_right']]
+        unique_right = [element for element in df[i]['gait_cycle_right'] if element not in df[i]['gait_cycle_left']]
+        print('checked')
+        if unique_left or unique_right:
+            print(unique_left)
+            print(unique_right)
             print("Error: there's at least one event missing in either foot")
             return False
-        else:
-            return True
-
+    return True
 def exclude_outliers(df):
-    for i in range(len(df['apf_left'])):
-        indices_to_drop = []  # Create a list to store indices to be dropped
-        for j in range(len(df['apf_left'][i])):
-            apf_l = df['apf_left'][i][j]
-            apf_r = df['apf_left'][i][j]
+    # Iterate over each DataFrame in the list
+    for i in range(len(df)):
+        # Create a boolean mask to identify the rows to keep
+        mask = ((-50 <= df[i]['apf_left']) & (df[i]['apf_left'] <= 20) &
+                (-50 <= df[i]['apf_right']) & (df[i]['apf_right'] <= 20))
 
-            if not (-50 <= apf_l <= 20 and -50 <= apf_r <= 20):
-            # If conditions are not met, add the index to the list of indices to be dropped
-                indices_to_drop.append(j)
-
-        # Remove the elements at the specified indices from apf_left, apf_right, and time lists
-        df['apf_left'][i] = [apf_l for j, apf_l in enumerate(df['apf_left'][i]) if j not in indices_to_drop]
-        df['apf_right'][i] = [apf_r for j, apf_r in enumerate(df['apf_right'][i]) if j not in indices_to_drop]
-        df['time'][i] = [t for j, t in enumerate(df['time'][i]) if j not in indices_to_drop]
-        df['real_time_left'][i] = [t for j, t in enumerate(df['real_time_left'][i]) if j not in indices_to_drop]
-        df['real_time_right'][i] = [t for j, t in enumerate(df['real_time_right'][i]) if j not in indices_to_drop]
-        df['gait_cycle_left'][i] = [g_c for j, g_c in enumerate(df['gait_cycle_left'][i]) if j not in indices_to_drop]
-        df['gait_cycle_right'][i] = [g_c for j, g_c in enumerate(df['gait_cycle_right'][i]) if j not in indices_to_drop]
+        print("Original length:", len(df[i]['apf_left']))
+        # Apply the mask to filter the DataFrame and reset the index
+        df[i] = df[i][mask].reset_index(drop=True)
+        print("New length:", len(df[i]['apf_left']))
 
 def print_in_excel_table(value, sheet_name, row_header, column_header, output_file):
     # Read the Excel file into a DataFrame
@@ -205,3 +206,51 @@ def print_in_excel_table(value, sheet_name, row_header, column_header, output_fi
     # Write DataFrame back to Excel file
     df.to_excel(output_file, sheet_name=sheet_name)
 
+def calculate_averages (subjects, FB_mode, param):
+    t_intervals = [(0, 60), (60, 240), (240, 300), (300, 480), (480, 660)]
+    participant_averages = {}
+    if FB_mode.lower() == 'st':
+        fb = 0
+    elif FB_mode.lower() == 'pof':
+        fb = 1
+    elif FB_mode.lower() == 'apf':
+        fb = 2
+
+    for i in range(1, len(subjects)+1):
+        t_average = []
+        symmetry_ratio = []
+        for start_time, end_time in t_intervals:
+            filt = (subjects[f'S{i}'].param[fb]['time'] >= start_time) & (subjects[f'S{i}'].param[fb]['time'] <= end_time)
+            df_phase = subjects[f'S{i}'].param[fb][filt].reset_index(drop=True, inplace=True)
+
+            total_datapoints = df_phase.shape[0]
+            group_size = int(total_datapoints * 0.1)  # 10% of phase
+            num_groups = total_datapoints // group_size
+
+            # Calculate the average for each group -> 10 groups
+            for j in range(10):
+                start_index = j * group_size
+                end_index = (j + 1) * group_size
+
+                sym_ratios = df_phase.iloc[start_index:end_index + 1, :]['SR']  # SR already divided by baseline SR
+                symmetry_ratio.append(sym_ratios.mean())
+                t_average.append(df_phase.loc[start_index:end_index,['time']].mean())
+
+                participant_averages[i] = {
+                    'time_average': t_average,
+                    'symmetry_ratio': symmetry_ratio
+                }
+
+    # Averaging over all participants
+    mean_SR = []
+    std_SR = []
+    mean_time = []
+
+    for k in range(len(participant_averages[0]['symmetry_ratio'])):
+        symmetry_ratios_at_position = [avg_data['symmetry_ratio'][k] for avg_data in participant_averages.values()]
+        time_at_position = [avg_time['time_average'][k] for avg_time in participant_averages.values()]
+        mean_SR.append(np.mean(symmetry_ratios_at_position))
+        std_SR.append(np.mean(np.std(symmetry_ratios_at_position) / np.sqrt(len(symmetry_ratios_at_position))))
+        mean_time.append(np.mean(time_at_position))
+
+    return mean_SR, std_SR, mean_time

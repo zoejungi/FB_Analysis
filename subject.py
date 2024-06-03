@@ -1,12 +1,11 @@
 # Class subject
 # in: subject id, FB given on ST/APF/POF
 
-import numpy as np
 from helperfunctions import *
 from Plotting import *
 
 class Subject (Plotting):
-    def __init__(self, sub_id, study, input_data, params_excl=[]): #if study = "FB" then subject from FB study -> param include df from all three FB trials
+    def __init__(self, sub_id, study, input_data): #if study = "FB" then subject from FB study -> param include df from all three FB trials
         super().__init__()
         self.ID = sub_id
         self.study = study
@@ -15,11 +14,10 @@ class Subject (Plotting):
         df = pd.read_excel(os.path.join(input_data, 'Data_subjects.xlsx'), index_col=None) # Read the Excel file
         filtered_df = df[df.iloc[:, 0].str.contains(sub_id, na=False)] # Filter rows for subject specific infos (first column = sub_ids)
         self.infos = pd.concat([df.iloc[:1], filtered_df]) # Combine headers and filtered rows
-        self.params_excl = params_excl #list of parameters for which they are excluded (APF, ST or POF FB)
     def ST(self):
         # input = self
-        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, stance_duration_p_left/right,
-        #           cycle_duration_s_left/right,
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, stance_duration_p_left, cycle_duration_s_left, stance_duration_p_right
+        #           cycle_duration_s_right, ST_left, ST_right, time, SR_raw, SR, SR_SMA5, ST_left_SMA5, ST_right_SMA5
         if self.study == "hFB" or "vFB":
             # datasets with only columns of interest for all three FB modes
             df_res = []
@@ -72,8 +70,11 @@ class Subject (Plotting):
             df_res = []
 
         return df_res
-
     def POF(self):
+        # input = self
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, POF (=left),
+        #               time, SR_raw, SR, SR_SMA5, POF_left_SMA5, POF_right_SMA5
+
         if self.study == "hFB" or "vFB":
             # datasets with only columns of interest for all three FB modes
 
@@ -130,25 +131,26 @@ class Subject (Plotting):
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for POF")
 
         return df_left
-
     def maxAPF(self):
+        # input = self
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, apf_left, apf_right
+        #           time, SR_raw, SR, SR_SMA5, APF_left_SMA5, APF_right_SMA5
+
         if self.study == "hFB" or "vFB":
 
             df_apf = []
             data_paths = [get_filepath(datapath = self.datapath, sub_id = self.ID, FB="ST", param="APF"),
                           get_filepath(datapath = self.datapath, sub_id = self.ID, FB="POF", param="APF"),
                           get_filepath(datapath = self.datapath, sub_id = self.ID, FB="APF", param="APF")]
-            print(data_paths)
             for i, file_path in enumerate(data_paths):
                 if '.txt' in data_paths[i]:
                     print(f'{file_path} from txt to csv')
                     file_path = convert_txt_to_csv(file_path, separator='\t')
                 df = pd.read_csv(file_path)
-                print(df)
                 df = df.apply(pd.to_numeric) # whole dataframe from str to num
                 if 'left apf offset' in df.columns:
-                    df.rename(columns={'left apf offset': LAPF.Offset}, inplace=True)
-                    df.rename(columns={'right apf offset': RAPF.Offset}, inplace=True)
+                    df.rename(columns={'left apf offset': 'LAPF.Offset'}, inplace=True)
+                    df.rename(columns={'right apf offset': 'RAPF.Offset'}, inplace=True)
                 df['LAPF.Offset'] = - df['LAPF.Offset']
                 df['RAPF.Offset'] = - df['RAPF.Offset']
                 df['Time_adj'] = df['Time'] - df['Time'][0]
@@ -162,28 +164,29 @@ class Subject (Plotting):
                 df_apf.append(df)
             print('Step 1 (reading data) complete')
             # Identifying max APF
-            df_apf_final = identify_maxAPF(df_apf)
-            print('Step 2 (identify maxAPF) complete')
-            # only continue if both sides have the same amount of events
-            if check_cycles(df_apf_final):
-                # Getting rid of outliers that are anatomically impossible
-                exclude_outliers(df_apf_final)
-                ('Step 3 (anatomically impossible values excluded) complete')
-                if check_cycles(df_apf_final):
-                    # compute symmetry ratio
-                    baseline_sr = self.infos['BSR APF']
-                    for i, df in enumerate(df_apf_final):
-                        if df_apf_final[i]['apf_right'] != 0 and df_apf_final[i]['apf_right'] != None and df_apf_final[i]['apf_left'] != None:
-                            df_apf_final[i]['SR_raw'] = df_apf_final[i]['apf_left']/df_apf_final[i]['apf_right']
-                            df_apf_final[i]['SR'] = df_apf_final[i]['SR_raw']/baseline_sr
-                            df_apf_final[i]['time_sr'] = df_apf_final[i]['time']
-                            df_apf_final[i]['SR_SMA5'] = df_apf_final[i]['SR'].rolling(window=5, min_periods=1).mean()
-
-                   #ratio_series = pd.Series(symmetry_ratios)
-                else:
-                    print("Error: there's at least one event missing in either foot after excluding the ouliers")
+            maxAPF_path = os.path.join(self.datapath, f'maxAPF_identified_{self.ID}.csv')
+            if os.path.exists(maxAPF_path):
+                df_apf_final_concat = pd.read_csv(maxAPF_path)
+                grouped = df_apf_final_concat.groupby('group_id')
+                df_apf_final = [grouped.get_group(group_id).drop(columns='group_id').reset_index(drop=True) for group_id in grouped.groups]
             else:
-                print("Error: there's at least one event missing in either foot")
+                df_apf_final = identify_maxAPF(df_apf, self.ID, self.datapath)
+            print('Step 2 (identify maxAPF) complete')
+            # Getting rid of outliers that are anatomically impossible
+            exclude_outliers(df_apf_final)
+            print('Step 3 (anatomically impossible values excluded) complete')
+            # compute symmetry ratio
+            baseline_sr = np.squeeze(self.infos['BSR APF'])
+            for i, df in enumerate(df_apf_final):
+                if not df_apf_final[i]['apf_right'].isnull().any() and not (df_apf_final[i]['apf_right'] == 0).any() and not df_apf_final[i]['apf_left'].isnull().any():
+                    df_apf_final[i]['SR_raw'] = df_apf_final[i]['apf_left']/df_apf_final[i]['apf_right']
+                    df_apf_final[i]['SR'] = df_apf_final[i]['SR_raw']/baseline_sr
+                    df_apf_final[i]['time_sr'] = df_apf_final[i]['time']
+                    df_apf_final[i]['SR_SMA5'] = df_apf_final[i]['SR'].rolling(window=5, min_periods=1).mean()
+                    df_apf_final[i]['APF_left_SMA5'] = df_apf_final[i]['apf_left'].rolling(window=5, min_periods=1).mean()
+                    df_apf_final[i]['APF_right_SMA5'] = df_apf_final[i]['apf_right'].rolling(window=5, min_periods=1).mean()
+
+                #ratio_series = pd.Series(symmetry_ratios)
         else:
             df_apf_final = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for APF")
@@ -191,6 +194,10 @@ class Subject (Plotting):
         return df_apf_final
 
     def maxKneeflexion(self):
+        # input = self
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, knee_flexion (=left)
+        #           time, SR_raw, SR, SR_SMA5, knee_left_SMA5, knee_right_SMA5
+
         if self.study == "hFB" or "vFB":
 
             df_knee_left = []
@@ -231,6 +238,7 @@ class Subject (Plotting):
             #calculate df_NW_sr
             df_knee_left_NW = copy.deepcopy(df_knee_left)
             df_knee_right_NW = copy.deepcopy(df_knee_right)
+            df_NW_sr = []
 
             for i in range(len(df_knee_left_NW)):
                 df_knee_left_NW[i] = df_knee_left_NW[i][df_knee_left_NW[i]["start_frame"] * 0.01 >= 0]
@@ -239,12 +247,7 @@ class Subject (Plotting):
                 df_knee_right_NW[i] = df_knee_right_NW[i][df_knee_right_NW[i]["start_frame"] * 0.01 >= 0]
                 df_knee_right_NW[i] = df_knee_right_NW[i][df_knee_right_NW[i]["time"] <= 60]
 
-            SR_max_knee_NW = [[] for _ in range(len(df_knee_left_NW))]
-            for i in range(len(SR_max_knee_NW)):
-                SR_max_knee_NW[i] = df_knee_left_NW[i]["knee_flexion"]/df_knee_right_NW[i]["knee_flexion"]
-            df_NW_sr = []
-            for i in range(len(SR_max_knee_NW)):
-                df_NW_sr.append(round(np.mean(SR_max_knee_NW[i]), 2))
+                df_NW_sr.append(round(np.mean(df_knee_left_NW[i]["knee_flexion"]/df_knee_right_NW[i]["knee_flexion"], 2)))
 
             df_knee = copy.deepcopy(df_knee_left)
             for i, df in enumerate(df_knee_left):
@@ -261,6 +264,10 @@ class Subject (Plotting):
 
         return df_knee
     def meanGRFz(self):
+        # input = self
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, mean_GRFz (=left)
+        #           time, SR_raw, SR, SR_SMA5, GRFz_left_SMA5, GRFz_right_SMA5
+
         if self.study == "hFB" or "vFB":
 
             df_left = [get_filepath(self.datapath, self.ID, FB='ST', param='left_GRF.Forces.z.Left-raw'),
@@ -300,6 +307,7 @@ class Subject (Plotting):
             #Calculate SR during NW
             df_GRF_left_NW = copy.deepcopy(df_GRF_left)
             df_GRF_right_NW = copy.deepcopy(df_GRF_right)
+            df_NW_sr = []
 
             for i in range(len(df_GRF_left_NW)):
                 df_GRF_left_NW[i] = df_GRF_left_NW[i][df_GRF_left_NW[i]["start_frame"] * 0.01 >= 0]
@@ -307,13 +315,7 @@ class Subject (Plotting):
                 df_GRF_right_NW[i] = df_GRF_right_NW[i][df_GRF_right_NW[i]["start_frame"] * 0.01 >= 0]
                 df_GRF_right_NW[i] = df_GRF_right_NW[i][df_GRF_right_NW[i]["time"] <= 60]
 
-            SR_meanGRFz_NW = [[] for _ in range(len(df_GRF_left_NW))]
-            for i in range(len(SR_meanGRFz_NW)):
-                SR_meanGRFz_NW[i] = df_GRF_left_NW[i]['meanGRFz'] / df_GRF_right_NW[i]['meanGRFz']
-
-            df_NW_sr = []
-            for i in range(len(SR_meanGRFz_NW)):
-                df_NW_sr.append(round(np.mean(SR_meanGRFz_NW[i]), 2))
+                df_NW_sr.append(round(df_GRF_left_NW[i]['meanGRFz'] / df_GRF_right_NW[i]['meanGRFz'],2))
 
             df_GRF = copy.deepcopy(df_GRF_left)
             for i, df in enumerate(df_GRF_left):
@@ -330,6 +332,10 @@ class Subject (Plotting):
 
         return df_GRF
     def swingTime(self):
+        # input = self
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, cycle_duration_s_left, cycle_duration_s_right,
+        #           swing_duration_p_left, swing_duration_p_right, swingtime_left, swingtime_right, time, SR_raw, SR, SR_SMA5,
+        #           swingtime_left_SMA5, swingtime_right_SMA5
 
         if self.study == "hFB" or "vFB":
             # datasets with only columns of interest for all three FB modes
@@ -383,7 +389,9 @@ class Subject (Plotting):
 
         return df_swing
     def stepLength(self):
-
+        # input = self
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, step_length_left, step_length_right,
+        #           time, SR_raw, SR, SR_SMA5, steplength_left_SMA5, steplength_right_SMA5
         if self.study == "hFB" or "vFB":
             # datasets with only columns of interest for all three FB modes
             df_step = []
@@ -433,7 +441,9 @@ class Subject (Plotting):
 
         return df_step
     def stepHeight(self):
-
+        # input = self
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, step_height_left, step_height_right,
+        #           time, SR_raw, SR, SR_SMA5, stepheight_left_SMA5, stepheight_right_SMA5
         if self.study == "hFB" or "vFB":
             # datasets with only columns of interest for all three FB modes
             df_step = []
@@ -484,7 +494,9 @@ class Subject (Plotting):
 
         return df_step
     def stepWidth(self):
-
+        # input = self
+        # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, step_width_left, step_width_right,
+        #           time, SR_raw, SR, SR_SMA5, stepwidth_left_SMA5, stepwidth_right_SMA5
         if self.study == "hFB" or "vFB":
             # datasets with only columns of interest for all three FB modes
             df_step = []
@@ -544,21 +556,16 @@ subjects_vFB = {}
 
 for i in range(1, n_hFB+1):
     subjects_hFB[f'S{i}'] = Subject(f'S{i}_', "hFB", r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data')
-print('dictionary subjects hFB created')
+    subjects_hFB[f'S{i}'].st = subjects_hFB[f'S{i}'].ST()
+print('dictionary subjects hFB created and st calculated for all')
 
-for i in range(1, n_vFB+1):
-    subjects_vFB[f'S{i}'] = Subject(f'S{i}_', "vFB", r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\Data')
-print('dictionary subjects vFB created')
+st_SR, st_SR_std, st_t = calculate_averages(subjects_hFB, 'st', 'st')
+Plotting.plot_SR(st_t, st_SR, label = 'ST SR', show = True)
 
-subjects_hFB[f'S1'].apf = subjects_hFB[f'S1'].maxAPF()
-#subjects_vFB[f'S12'].st = subjects_vFB[f'S12'].ST()
-
-
-
-#for j, df in enumerate(subjects_vFB[f'S12'].st):
- #   subjects_vFB[f'S12'].plot_SR(subjects_vFB[f'S12'].st[j]['time'], subjects_vFB[f'S12'].st[j]['SR_SMA5'],
-  #                                label='SR$_{ST}$', show = True)
-   # subjects_vFB[f'S12'].plot_leftvsright(subjects_vFB[f'S12'].st[j]['time'], subjects_vFB[f'S12'].st[j]['ST_left'],
-    #                                       subjects_vFB[f'S12'].st[j]['ST_right'], ylabel='ST [s]', show = True)
+#for j, df in enumerate(subjects_vFB[f'S1'].apf):
+ #   subjects_vFB[f'S1'].plot_SR(subjects_vFB[f'S1'].apf[j]['time'], subjects_vFB[f'S1'].apf[j]['SR_SMA5'],
+  #                                label='SR$_{maxAPF}$', show = True)
+   # subjects_vFB[f'S1'].plot_leftvsright(subjects_vFB[f'S1'].apf[j]['time'], subjects_vFB[f'S1'].apf[j]['APF_left_SMA5'],
+    #                                       subjects_vFB[f'S1'].apf[j]['APF_right_SMA5'], ylabel='APF [°]', show = True)
 
 

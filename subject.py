@@ -558,7 +558,7 @@ for i in range(1, n_hFB+1):
     subjects_hFB[f'S{i}'] = Subject(f'S{i}_', "hFB", r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data')
     subjects_hFB[f'S{i}'].st = subjects_hFB[f'S{i}'].ST()
 print('dictionary subjects hFB created and st calculated for all')
-
+print(type(subjects_hFB['S1'].st[1]['time']))
 st_SR, st_SR_std, st_t = calculate_averages(subjects_hFB, 'st', 'st')
 Plotting.plot_SR(st_t, st_SR, label = 'ST SR', show = True)
 

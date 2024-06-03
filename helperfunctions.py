@@ -220,8 +220,9 @@ def calculate_averages (subjects, FB_mode, param):
         t_average = []
         symmetry_ratio = []
         for start_time, end_time in t_intervals:
-            filt = (subjects[f'S{i}'].param[fb]['time'] >= start_time) & (subjects[f'S{i}'].param[fb]['time'] <= end_time)
-            df_phase = subjects[f'S{i}'].param[fb][filt].reset_index(drop=True, inplace=True)
+            filt = (subjects[f'S{i}'].__getattribute__(param)[fb]['time'] >= start_time) & (subjects[f'S{i}'].__getattribute__(param)[fb]['time'] <= end_time)
+            df_phase = subjects[f'S{i}'].__getattribute__(param)[fb][filt]
+            df_phase.reset_index(drop=True, inplace=True)
 
             total_datapoints = df_phase.shape[0]
             group_size = int(total_datapoints * 0.1)  # 10% of phase
@@ -245,12 +246,12 @@ def calculate_averages (subjects, FB_mode, param):
     mean_SR = []
     std_SR = []
     mean_time = []
-
-    for k in range(len(participant_averages[0]['symmetry_ratio'])):
+    print(participant_averages)
+    for k in range(len(participant_averages[1]['symmetry_ratio'])):
         symmetry_ratios_at_position = [avg_data['symmetry_ratio'][k] for avg_data in participant_averages.values()]
         time_at_position = [avg_time['time_average'][k] for avg_time in participant_averages.values()]
         mean_SR.append(np.mean(symmetry_ratios_at_position))
         std_SR.append(np.mean(np.std(symmetry_ratios_at_position) / np.sqrt(len(symmetry_ratios_at_position))))
         mean_time.append(np.mean(time_at_position))
 
-    return mean_SR, std_SR, mean_time
+    return pd.Series(mean_SR), pd.Series(std_SR), pd.Series(mean_time)

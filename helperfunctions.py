@@ -4,6 +4,7 @@ import math
 import pandas as pd
 import os
 import numpy as np
+import matplotlib.colors as mcolors
 
 def get_filepath (datapath, sub_id, FB, param):
     if param == 'APF':
@@ -219,28 +220,30 @@ def calculate_averages (subjects, FB_mode, param):
     for i in range(1, len(subjects)+1):
         t_average = []
         symmetry_ratio = []
-        for start_time, end_time in t_intervals:
-            filt = (subjects[f'S{i}'].__getattribute__(param)[fb]['time'] >= start_time) & (subjects[f'S{i}'].__getattribute__(param)[fb]['time'] <= end_time)
-            df_phase = subjects[f'S{i}'].__getattribute__(param)[fb][filt]
-            df_phase.reset_index(drop=True, inplace=True)
+        if not (subjects[f'S{i}'].study=='vFB' and (i == 2 or i==3 or i==4 or i==6 or i==12)):
+            for start_time, end_time in t_intervals:
+                filt = (subjects[f'S{i}'].__getattribute__(param)[fb]['time'] >= start_time) & (subjects[f'S{i}'].__getattribute__(param)[fb]['time'] <= end_time)
+                df_phase = subjects[f'S{i}'].__getattribute__(param)[fb][filt]
+                df_phase.reset_index(drop=True, inplace=True)
+                print(df_phase)
 
-            total_datapoints = df_phase.shape[0]
-            group_size = int(total_datapoints * 0.1)  # 10% of phase
-            num_groups = total_datapoints // group_size
+                total_datapoints = df_phase.shape[0]
+                group_size = int(total_datapoints * 0.1)  # 10% of phase
+                num_groups = total_datapoints // group_size
 
-            # Calculate the average for each group -> 10 groups
-            for j in range(10):
-                start_index = j * group_size
-                end_index = (j + 1) * group_size
+                # Calculate the average for each group -> 10 groups
+                for j in range(10):
+                    start_index = j * group_size
+                    end_index = (j + 1) * group_size
 
-                sym_ratios = df_phase.iloc[start_index:end_index + 1, :]['SR']  # SR already divided by baseline SR
-                symmetry_ratio.append(sym_ratios.mean())
-                t_average.append(df_phase.loc[start_index:end_index,['time']].mean())
+                    sym_ratios = df_phase.iloc[start_index:end_index + 1, :]['SR'] # SR already divided by baseline SR
+                    symmetry_ratio.append(sym_ratios.mean())
+                    t_average.append(df_phase.loc[start_index:end_index,['time']].mean())
 
-                participant_averages[i] = {
-                    'time_average': t_average,
-                    'symmetry_ratio': symmetry_ratio
-                }
+                    participant_averages[i] = {
+                        'time_average': t_average,
+                        'symmetry_ratio': symmetry_ratio
+                    }
 
     # Averaging over all participants
     mean_SR = []
@@ -255,3 +258,7 @@ def calculate_averages (subjects, FB_mode, param):
         mean_time.append(np.mean(time_at_position))
 
     return pd.Series(mean_SR), pd.Series(std_SR), pd.Series(mean_time)
+def get_color(base_color, incr):
+    base_rgb = mcolors.to_rgb(base_color)
+    similar_color = tuple(min(1, c + incr) for c in base_rgb)  # Adjust the increment value as needed
+    return similar_color

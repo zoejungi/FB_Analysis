@@ -265,14 +265,13 @@ def GDI (input_path, FB_mode, FB_param, output_file, excl=[], plot = False, save
     GDI_scaled_FB2_right = 100 - 10 * z_FB2_right
     print_in_excel_table(GDI_scaled_FB2_right.mean(), "GDI", FB_mode + " FB2 right", FB_param, output_file)
 
-    if plot:
+    if plot or save:
         #Plotting:
         plt.figure(figsize=(8,8))
         for i in range(min(len(GDI_scaled_NW), len(GDI_scaled_FB2_left))):
             plt.plot([1, 3], [GDI_scaled_NW[i], GDI_scaled_FB2_left[i]], linestyle='-')
         plt.axhline(y=100, color='grey', linestyle='--', linewidth=1)
         ax = plt.subplot()
-        #ax.set_xlim(df_res[i]['time'].iloc[1], df_res[i]['time'].iloc[-1])
         xticks = [1, 3]
         ax.set_xticks(xticks)
         for tick in xticks:
@@ -281,7 +280,7 @@ def GDI (input_path, FB_mode, FB_param, output_file, excl=[], plot = False, save
         plt.ylabel(f'GDI {FB_param}', fontsize = 18)
         plt.yticks(fontsize=16)
         plt.xticks(fontsize=16)
-        plt.title(f'{FB_mode}', fontsize = 20)
+        plt.title(f'{FB_mode}, n = {min(len(GDI_scaled_NW), len(GDI_scaled_FB2_left))}, mean = {np.round(GDI_scaled_FB2_left.mean(), 2)}', fontsize = 20)
         if save:
             plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\GDI\{FB_mode}_{FB_param}.png')
         plt.show()

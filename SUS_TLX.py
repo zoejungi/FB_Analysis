@@ -3,6 +3,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from helperfunctions import print_in_excel_table
+from helperfunctions import weighted_std_mean
 
 def TLX (df_q, excl = []):
     #input: dataframe with corresponding categories as column header
@@ -60,6 +62,27 @@ def SUS (df_q, n_questions, FB_mode, show = False, save = False):
                       df_q[f'APF SUS Q{i + 1}'].value_counts().get(0, 0),
                       df_q[f'APF SUS Q{i + 1}'].value_counts().get(1, 0),
                       df_q[f'APF SUS Q{i + 1}'].value_counts().get(2, 0)]
+
+        for j in range(len(categories)): # = number of categories
+            print_in_excel_table(values_POF[j], 'SUS', f'{FB_mode} POF Q{i+1}', f'{categories[j]}', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+            print_in_excel_table(values_APF[j], 'SUS', f'{FB_mode} APF Q{i+1}', f'{categories[j]}', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+            print_in_excel_table(values_ST[j], 'SUS', f'{FB_mode} ST Q{i+1}', f'{categories[j]}', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+
+        #mean_ST = (values_ST[0]*4 + values_ST[1]*3 + values_ST[2]*2 + values_ST[3]*1) / np.sum(values_ST[:])
+        #mean_POF = (values_POF[0]*4 + values_POF[1]*3 + values_POF[2]*2 + values_POF[3]*1) / np.sum(values_POF[:])
+        #mean_APF = (values_APF[0]*4 + values_APF[1]*3 + values_APF[2]*2 + values_APF[3]*1)/np.sum(values_APF[:])
+        w = [4, 3, 2, 1, 0]
+        std_ST, mean_ST = weighted_std_mean(w, values_ST)
+        std_POF, mean_POF = weighted_std_mean(w, values_POF)
+        std_APF, mean_APF = weighted_std_mean(w, values_APF)
+
+        print_in_excel_table(np.round(mean_ST,2), 'SUS', f'{FB_mode} ST Q{i+1}', 'Mean', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+        print_in_excel_table(np.round(mean_POF,2), 'SUS', f'{FB_mode} POF Q{i + 1}', 'Mean', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+        print_in_excel_table(np.round(mean_APF,2), 'SUS', f'{FB_mode} APF Q{i + 1}', 'Mean', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+
+        print_in_excel_table(np.round(std_ST, 2), 'SUS', f'{FB_mode} ST Q{i + 1}', 'STD',r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+        print_in_excel_table(np.round(std_POF, 2), 'SUS', f'{FB_mode} POF Q{i + 1}', 'STD', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+        print_in_excel_table(np.round(std_APF, 2), 'SUS', f'{FB_mode} APF Q{i + 1}', 'STD', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
 
         plt.bar(x_positions_st, values_ST, width=bar_width, color='skyblue', label='ST')
         plt.bar(x_positions_pof, values_POF, width=bar_width, color='limegreen', label='POF')

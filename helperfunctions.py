@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import numpy as np
 import matplotlib.colors as mcolors
+from openpyxl import load_workbook
 
 def get_filepath (datapath, sub_id, FB, param):
     if param == 'APF':
@@ -186,9 +187,19 @@ def exclude_outliers(df):
         df[i] = df[i][mask].reset_index(drop=True)
         print("New length:", len(df[i]['apf_left']))
 
+
 def print_in_excel_table(value, sheet_name, row_header, column_header, output_file):
-    # Read the Excel file into a DataFrame
+    # Load the existing Excel file
+    book = load_workbook(output_file)
+
+    # Check if the sheet exists
+    if sheet_name not in book.sheetnames:
+        print(f"Sheet '{sheet_name}' not found.")
+        return
+
+    # Load the sheet into a DataFrame
     df = pd.read_excel(output_file, sheet_name=sheet_name, index_col=0)
+
     # Find the row and column index based on the row and column headers
     try:
         row_index = df.index.get_loc(row_header)
@@ -204,9 +215,10 @@ def print_in_excel_table(value, sheet_name, row_header, column_header, output_fi
     # Set value in specific cell
     df.iloc[row_index, column_index] = value
 
-    # Write DataFrame back to Excel file
-    df.to_excel(output_file, sheet_name=sheet_name)
-
+    # Write the DataFrame back to the same sheet in the Excel file
+    with pd.ExcelWriter(output_file, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+        # No need to set writer.book or writer.sheets explicitly
+        df.to_excel(writer, sheet_name=sheet_name)
 def calculate_averages (subjects, FB_mode, param):
     t_intervals = [(0, 60), (60, 240), (240, 300), (300, 480), (480, 660)]
     participant_averages = {}
@@ -262,3 +274,8 @@ def get_color(base_color, incr):
     base_rgb = mcolors.to_rgb(base_color)
     similar_color = tuple(min(1, c + incr) for c in base_rgb)  # Adjust the increment value as needed
     return similar_color
+
+def weighted_std_mean(values, weights):
+    mean = np.average(values, weights=weights)
+    variance = np.average((values - mean) ** 2, weights=weights)
+    return np.sqrt(variance), mean

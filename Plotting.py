@@ -40,10 +40,11 @@ class Plotting:
             plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Indiv\{savingname}')
         if show:
             plt.show()
+        plt.close()
     @classmethod
     def plot_SR (cls, x, y, label, show = False, title = [], color = 'm', baseline = True, savingname = [], target = True):
         plt.figure(figsize = (10, 8))
-        plt.plot(x, y, marker='', markersize=4, linewidth=1, linestyle='-', color=color, label=f'{label}$')
+        plt.plot(x, y, marker='', markersize=4, linewidth=1, linestyle='-', color=color, label=f'{label}')
         plt.axhline(y=1, color='lightgrey', linestyle='-', linewidth=1)
 
         if target:
@@ -82,6 +83,7 @@ class Plotting:
             plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Indiv\{savingname}')
         if show:
             plt.show()
+        plt.close()
     @classmethod
     def plot_SR_std (cls, x, y, y_std, label = None, show = False, title = [], color = 'c', baseline = True, savingname = [], target = True):
         plt.figure(figsize = (10, 8))
@@ -125,7 +127,7 @@ class Plotting:
             plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Summary\{savingname}')
         if show:
             plt.show()
-
+        plt.close()
     @classmethod
     def plot_2SR_std (cls, x1, y1, y1_std, x2, y2, y2_std, label1, label2, show = False, title = [], color = ['purple', 'darkgreen'], baseline = True, savingname = [], target = True):
         plt.figure(figsize = (10, 8))
@@ -174,6 +176,7 @@ class Plotting:
             plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Summary\{savingname}')
         if show:
             plt.show()
+        plt.close()
     @classmethod
     def plot_3SR_std (cls, x1, y1, y1_std, x2, y2, y2_std, x3, y3, y3_std, label1, label2, label3, show = False, title = [], color = ['c', 'm', 'burlywood'], baseline = True, savingname = [], target = True):
         plt.figure(figsize = (10, 8))
@@ -225,3 +228,4 @@ class Plotting:
             plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Summary\{savingname}')
         if show:
             plt.show()
+        plt.close()

@@ -1,20 +1,19 @@
 # This is a sample main.py how to analyse and plot FB data from D-Flow and Vicon
-from subject import *
 from GDI import *
 from SUS_TLX import *
 
 # GDI
 
-hFB_GDI_path = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data\extraction_normalization'
-vFB_GDI_path = r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\Data\extraction_normalization'
+#hFB_GDI_path = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data\extraction_normalization'
+#vFB_GDI_path = r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\Data\extraction_normalization'
 
-#GDI(hFB_GDI_path, "hFB", "ST", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx")
-#GDI(hFB_GDI_path, "hFB", "APF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx")
-#GDI(hFB_GDI_path, "hFB", "POF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx")
-#GDI(vFB_GDI_path, "vFB", "ST", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"])
-#GDI(vFB_GDI_path, "vFB", "APF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"])
-#GDI(vFB_GDI_path, "vFB", "POF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"])
-
+#GDI(hFB_GDI_path, "hFB", "ST", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", save=True)
+#GDI(hFB_GDI_path, "hFB", "APF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", save = True)
+#GDI(hFB_GDI_path, "hFB", "POF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", save = True)
+#GDI(vFB_GDI_path, "vFB", "ST", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"], save = True)
+#GDI(vFB_GDI_path, "vFB", "APF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"], save = True)
+#GDI(vFB_GDI_path, "vFB", "POF", output_file= r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables.xlsx", excl=["S2_","S3_","S6_","S12_"], save = True)
+#print('GDI calculated for all')
 # SUS_TLX
 
 n_hFB = 20 #number of subjects hFB

@@ -11,8 +11,8 @@ class Subject (Plotting):
         self.datapath = input_data
 
         df = pd.read_excel(os.path.join(input_data, 'Data_subjects.xlsx'), index_col=None) # Read the Excel file
-        filtered_df = df[df.iloc[:, 0].str.contains(sub_id, na=False)] # Filter rows for subject specific infos (first column = sub_ids)
-        self.infos = pd.concat([df.iloc[:1], filtered_df]) # Combine headers and filtered rows
+        filtered_df = df[df.iloc[:, 0] == sub_id[:-1]] # Filter rows for subject specific infos (first column = sub_ids)
+        self.infos = filtered_df # Combine headers and filtered rows
     def ST(self):
         # input = self
         # output = array of dfs (during ST, POF and APF FB), headers include cycle_number, stance_duration_p_left, cycle_duration_s_left, stance_duration_p_right
@@ -175,16 +175,14 @@ class Subject (Plotting):
             print('Step 3 (anatomically impossible values excluded) complete')
             # compute symmetry ratio
             baseline_sr = np.squeeze(self.infos['BSR APF'])
-            for i, df in enumerate(df_apf_final):
-                if not df_apf_final[i]['apf_right'].isnull().any() and not (df_apf_final[i]['apf_right'] == 0).any() and not df_apf_final[i]['apf_left'].isnull().any():
-                    df_apf_final[i]['SR_raw'] = df_apf_final[i]['apf_left']/df_apf_final[i]['apf_right']
-                    df_apf_final[i]['SR'] = df_apf_final[i]['SR_raw']/baseline_sr
-                    df_apf_final[i]['time_sr'] = df_apf_final[i]['time']
-                    df_apf_final[i]['SR_SMA5'] = df_apf_final[i]['SR'].rolling(window=5, min_periods=1).mean()
-                    df_apf_final[i]['APF_left_SMA5'] = df_apf_final[i]['apf_left'].rolling(window=5, min_periods=1).mean()
-                    df_apf_final[i]['APF_right_SMA5'] = df_apf_final[i]['apf_right'].rolling(window=5, min_periods=1).mean()
-
-                #ratio_series = pd.Series(symmetry_ratios)
+            for j, df in enumerate(df_apf_final):
+                if not df_apf_final[j]['apf_right'].isnull().any() and not (df_apf_final[j]['apf_right'] == 0).any() and not df_apf_final[j]['apf_left'].isnull().any():
+                    df_apf_final[j]['SR_raw'] = df_apf_final[j]['apf_left']/df_apf_final[j]['apf_right']
+                    df_apf_final[j]['SR'] = df_apf_final[j]['SR_raw']/baseline_sr
+                    df_apf_final[j]['time_sr'] = df_apf_final[j]['time']
+                    df_apf_final[j]['SR_SMA5'] = df_apf_final[j]['SR'].rolling(window=5, min_periods=1).mean()
+                    df_apf_final[j]['APF_left_SMA5'] = df_apf_final[j]['apf_left'].rolling(window=5, min_periods=1).mean()
+                    df_apf_final[j]['APF_right_SMA5'] = df_apf_final[j]['apf_right'].rolling(window=5, min_periods=1).mean()
         else:
             df_apf_final = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for APF")
@@ -544,78 +542,3 @@ class Subject (Plotting):
 
         return df_step
 
-#testing for the moment (before using main)
-n_hFB = 20
-n_vFB = 24
-subjects_hFB = {}
-subjects_vFB = {}
-
-for i in range(1, n_hFB+1):
-    subjects_hFB[f'S{i}'] = Subject(f'S{i}_', "hFB", r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data')
-    subjects_hFB[f'S{i}'].st = subjects_hFB[f'S{i}'].ST()
-print('dictionary subjects hFB created')
-for i in range(1, n_vFB+1):
-    subjects_vFB[f'S{i}'] = Subject(f'S{i}_', "vFB", r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\Data')
-print('dictionary subjects vFB created')
-
-for i in range(1, n_vFB+1):
-    if i != 2 and i != 3 and i != 4 and i != 6 and i !=12:
-        subjects_vFB[f'S{i}'].st = subjects_vFB[f'S{i}'].ST()
-print('gait params calculated')
-
-# plot all individuals
-for i in range(1, n_hFB+1):
-    # ST
-
-    for j, df in enumerate(subjects_hFB[f'S{i}'].st):
-        subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].st[j]['time'], subjects_hFB[f'S{i}'].st[j]['SR_SMA5'], label=f'S{i} SR$_{{ST}}$', savingname=f'hFB_S{i}_ST_SR')
-        subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].st[j]['time'], subjects_hFB[f'S{i}'].st[j]['ST_left'], subjects_hFB[f'S{i}'].st[j]['ST_right'], ylabel='ST [s]', savingname=f'hFB_S{i}_ST_lr')
-# plot all individuals
-for i in range(1, n_vFB+1):
-    # ST
-    if i != 2 and i != 3 and i != 4 and i != 6 and i !=12:
-        for j, df in enumerate(subjects_vFB[f'S{i}'].st):
-            subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].st[j]['time'], subjects_vFB[f'S{i}'].st[j]['SR_SMA5'], label=f'S{i} SR$_{{ST}}$', savingname=f'vFB_S{i}_ST_SR')
-            subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].st[j]['time'], subjects_vFB[f'S{i}'].st[j]['ST_left'], subjects_vFB[f'S{i}'].st[j]['ST_right'], ylabel='ST [s]', savingname=f'vFB_S{i}_ST_lr')
-
-# plot all hFB
-#hFB_st_SR_duringST, hFB_st_SR_std_duringST, hFB_st_t_duringST = calculate_averages(subjects_hFB, FB_mode = 'st', param = 'st')
-#hFB_st_SR_duringPOF, hFB_st_SR_std_duringPOF, hFB_st_t_duringPOF = calculate_averages(subjects_hFB, FB_mode = 'pof', param ='st')
-#hFB_st_SR_duringAPF, hFB_st_SR_std_duringAPF, hFB_st_t_duringAPF = calculate_averages(subjects_hFB, FB_mode = 'apf', param='st')
-'''
-hFB_pof_SR_duringST, hFB_pof_SR_std_duringST, hFB_pof_t_duringST = calculate_averages(subjects_hFB, FB_mode = 'st', param = 'pof')
-hFB_pof_SR_duringPOF, hFB_pof_SR_std_duringPOF, hFB_pof_t_duringPOF = calculate_averages(subjects_hFB, FB_mode = 'pof', param ='pof')
-hFB_pof_SR_duringAPF, hFB_pof_SR_std_duringAPF, hFB_pof_t_duringAPF = calculate_averages(subjects_hFB, FB_mode = 'apf', param='pof')
-
-hFB_apf_SR_duringST, hFB_apf_SR_std_duringST, hFB_apf_t_duringST = calculate_averages(subjects_hFB, FB_mode = 'st', param = 'apf')
-hFB_apf_SR_duringPOF, hFB_apf_SR_std_duringPOF, hFB_apf_t_duringPOF = calculate_averages(subjects_hFB, FB_mode = 'pof', param ='apf')
-hFB_apf_SR_duringAPF, hFB_apf_SR_std_duringAPF, hFB_apf_t_duringAPF = calculate_averages(subjects_hFB, FB_mode = 'apf', param='apf')
-
-Plotting.plot_3SR_std(hFB_st_t_duringST, hFB_st_SR_duringST, hFB_st_SR_std_duringST, hFB_st_t_duringPOF, hFB_st_SR_duringPOF, hFB_st_SR_std_duringPOF, hFB_st_t_duringAPF, hFB_st_SR_duringAPF, hFB_st_SR_std_duringAPF, 'ST during ST', 'ST during POF', 'ST during APF', show = True, color=['orchid', get_color('orchid', 0.15), get_color('orchid', 0.3)], savingname='hFB_meanST_SR_all', title = f'hFB, n = {len(subjects_hFB)}')
-Plotting.plot_3SR_std(hFB_pof_t_duringST, hFB_pof_SR_duringST, hFB_pof_SR_std_duringST, hFB_pof_t_duringPOF, hFB_pof_SR_duringPOF, hFB_pof_SR_std_duringPOF, hFB_pof_t_duringAPF, hFB_pof_SR_duringAPF, hFB_pof_SR_std_duringAPF, 'POF during ST', 'POF during POF', 'POF during APF', show = True, color=[get_color('burlywood', 0.1), 'burlywood', get_color('burlywood', 0.2)], savingname='hFB_meanPOF_SR_all', title = f'hFB, n = {len(subjects_hFB)}')
-Plotting.plot_3SR_std(hFB_apf_t_duringST, hFB_apf_SR_duringST, hFB_apf_SR_std_duringST, hFB_apf_t_duringPOF, hFB_apf_SR_duringPOF, hFB_apf_SR_std_duringPOF, hFB_apf_t_duringAPF, hFB_apf_SR_duringAPF, hFB_apf_SR_std_duringAPF, 'APF during ST', 'APF during POF', 'APF during APF', show = True, color=[get_color('c', 0.15), get_color('c', 0.3), 'c'], savingname='hFB_meanAPF_SR_all')
-
-Plotting.plot_3SR_std(hFB_st_t_duringST, hFB_st_SR_duringST, hFB_st_SR_std_duringST, hFB_pof_t_duringPOF, hFB_pof_SR_duringPOF, hFB_pof_SR_std_duringPOF, hFB_apf_t_duringAPF, hFB_apf_SR_duringAPF, hFB_apf_SR_std_duringAPF, 'ST during ST', 'POF during POF', 'APF during APF', show = True, color=['orchid', 'burlywood', 'c'], savingname='hFB_SR_all')
-
-vFB_st_SR_duringST, vFB_st_SR_std_duringST, vFB_st_t_duringST = calculate_averages(subjects_vFB, FB_mode = 'st', param = 'st')
-vFB_st_SR_duringPOF, vFB_st_SR_std_duringPOF, vFB_st_t_duringPOF = calculate_averages(subjects_vFB, FB_mode = 'pof', param ='st')
-vFB_st_SR_duringAPF, vFB_st_SR_std_duringAPF, vFB_st_t_duringAPF = calculate_averages(subjects_vFB, FB_mode = 'apf', param='st')
-
-vFB_pof_SR_duringST, vFB_pof_SR_std_duringST, vFB_pof_t_duringST = calculate_averages(subjects_vFB, FB_mode = 'st', param = 'pof')
-vFB_pof_SR_duringPOF, vFB_pof_SR_std_duringPOF, vFB_pof_t_duringPOF = calculate_averages(subjects_vFB, FB_mode = 'pof', param ='pof')
-vFB_pof_SR_duringAPF, vFB_pof_SR_std_duringAPF, vFB_pof_t_duringAPF = calculate_averages(subjects_vFB, FB_mode = 'apf', param='pof')
-
-vFB_apf_SR_duringST, vFB_apf_SR_std_duringST, vFB_apf_t_duringST = calculate_averages(subjects_vFB, FB_mode = 'st', param = 'apf')
-vFB_apf_SR_duringPOF, vFB_apf_SR_std_duringPOF, vFB_apf_t_duringPOF = calculate_averages(subjects_vFB, FB_mode = 'pof', param ='apf')
-vFB_apf_SR_duringAPF, vFB_apf_SR_std_duringAPF, vFB_apf_t_duringAPF = calculate_averages(subjects_vFB, FB_mode = 'apf', param='apf')
-
-Plotting.plot_3SR_std(vFB_st_t_duringST, vFB_st_SR_duringST, vFB_st_SR_std_duringST, vFB_st_t_duringPOF, vFB_st_SR_duringPOF, vFB_st_SR_std_duringPOF, vFB_st_t_duringAPF, vFB_st_SR_duringAPF, vFB_st_SR_std_duringAPF, 'ST during ST', 'ST during POF', 'ST during APF', show = True, color=['orchid', get_color('orchid', 0.15), get_color('orchid', 0.3)], savingname='vFB_meanST_SR_all', title = f'vFB, n = {len(subjects_vFB)-4}')
-Plotting.plot_3SR_std(vFB_pof_t_duringST, vFB_pof_SR_duringST, vFB_pof_SR_std_duringST, vFB_pof_t_duringPOF, vFB_pof_SR_duringPOF, vFB_pof_SR_std_duringPOF, vFB_pof_t_duringAPF, vFB_pof_SR_duringAPF, vFB_pof_SR_std_duringAPF, 'POF during ST', 'POF during POF', 'POF during APF', show = True, color=[get_color('burlywood', 0.1), 'burlywood', get_color('burlywood', 0.2)], savingname='vFB_meanPOF_SR_all', title = f'vFB, n = {len(subjects_vFB)-4}')
-Plotting.plot_3SR_std(vFB_apf_t_duringST, vFB_apf_SR_duringST, vFB_apf_SR_std_duringST, vFB_apf_t_duringPOF, vFB_apf_SR_duringPOF, vFB_apf_SR_std_duringPOF, vFB_apf_t_duringAPF, vFB_apf_SR_duringAPF, vFB_apf_SR_std_duringAPF, 'APF during ST', 'APF during POF', 'APF during APF', show = True, color=[get_color('c', 0.15), get_color('c', 0.3), 'c'], savingname='vFB_meanAPF_SR_all')
-
-Plotting.plot_3SR_std(vFB_st_t_duringST, vFB_st_SR_duringST, vFB_st_SR_std_duringST, vFB_pof_t_duringPOF, vFB_pof_SR_duringPOF, vFB_pof_SR_std_duringPOF, vFB_apf_t_duringAPF, vFB_apf_SR_duringAPF, vFB_apf_SR_std_duringAPF, 'ST during ST', 'POF during POF', 'APF during APF', show = True, color=['orchid', 'burlywood', 'c'], savingname='vFB_SR_all')
-
-Plotting.plot_2SR_std(hFB_st_t_duringST, hFB_st_SR_duringST, hFB_st_SR_std_duringST, vFB_st_t_duringST, vFB_st_SR_duringST, vFB_st_SR_std_duringST, 'ST during hFB', 'ST during vFB', show = True, savingname='comp_SR_ST')
-Plotting.plot_2SR_std(hFB_pof_t_duringPOF, hFB_pof_SR_duringPOF, hFB_pof_SR_std_duringPOF, vFB_pof_t_duringPOF, vFB_pof_SR_duringPOF, vFB_pof_SR_std_duringPOF, 'POF during hFB', 'POF during vFB', show = True, savingname='comp_SR_POF')
-Plotting.plot_2SR_std(hFB_apf_t_duringAPF, hFB_apf_SR_duringAPF, hFB_apf_SR_std_duringAPF, vFB_apf_t_duringAPF, vFB_apf_SR_duringAPF, vFB_apf_SR_std_duringAPF, 'APF during hFB', 'APF during vFB', show = True, savingname='comp_SR_APF')
-'''

@@ -42,7 +42,7 @@ class Plotting:
             plt.show()
         plt.close()
     @classmethod
-    def plot_SR (cls, x, y, label, show = False, title = [], color = 'm', baseline = True, savingname = [], target = True):
+    def plot_SR (cls, x, y, label, show = False, title = [], color = 'm', yaxis = False, baseline = True, savingname = [], target = True):
         plt.figure(figsize = (10, 8))
         plt.plot(x, y, marker='', markersize=4, linewidth=1, linestyle='-', color=color, label=f'{label}')
         plt.axhline(y=1, color='lightgrey', linestyle='-', linewidth=1)
@@ -51,11 +51,15 @@ class Plotting:
             plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label='Target Value')
             plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2, label='Margin zone')
         ax = plt.subplot()
-        ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
-        ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
-        ax.set_xlim(x.iloc[1], x.iloc[-1])
-        ax.set_ylim(0.7,1.1)
+        if yaxis:
+            # Autoscale the y-axis
+            plt.autoscale(enable=True, axis='y', tight=False)
+        else:
+            ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
+            ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
+            ax.set_ylim(0.7,1.1)
 
+        ax.set_xlim(x.iloc[1], x.iloc[-1])
         xticks = [x.iloc[1], 60, 240, 300,480]
         ax.set_xticks(xticks)  # only set ticks every second location, starting with first location
         ax.set_xticklabels([''] * len(xticks))  # Set empty labels
@@ -85,7 +89,7 @@ class Plotting:
             plt.show()
         plt.close()
     @classmethod
-    def plot_SR_std (cls, x, y, y_std, label = None, show = False, title = [], color = 'c', baseline = True, savingname = [], target = True):
+    def plot_SR_std (cls, x, y, y_std, label = None, show = False, yaxis = False, title = [], color = 'c', baseline = True, savingname = [], target = True):
         plt.figure(figsize = (10, 8))
         plt.fill_between(x, np.array(y) - np.array(y_std), np.array(y) + np.array(y_std), color=color, alpha=0.1)
         plt.plot(x, y, marker='o', markersize=4, linewidth=1, linestyle='-', color=color, label=f'Mean SR$_{{{label}}}$')
@@ -95,11 +99,15 @@ class Plotting:
             plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label='Target Value')
             plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2, label='Margin zone')
         ax = plt.subplot()
-        ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
-        ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
-        ax.set_xlim(x.iloc[1], x.iloc[-1])
-        ax.set_ylim(0.7,1.1)
+        if yaxis:
+            # Autoscale the y-axis
+            plt.autoscale(enable=True, axis='y', tight=False)
+        else:
+            ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
+            ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
+            ax.set_ylim(0.7,1.1)
 
+        ax.set_xlim(x.iloc[1], x.iloc[-1])
         xticks = [x.iloc[1], 60, 240, 300,480]
         ax.set_xticks(xticks)  # only set ticks every second location, starting with first location
         ax.set_xticklabels([''] * len(xticks))  # Set empty labels
@@ -129,7 +137,7 @@ class Plotting:
             plt.show()
         plt.close()
     @classmethod
-    def plot_2SR_std (cls, x1, y1, y1_std, x2, y2, y2_std, label1, label2, show = False, title = [], color = ['purple', 'darkgreen'], baseline = True, savingname = [], target = True):
+    def plot_2SR_std (cls, x1, y1, y1_std, x2, y2, y2_std, label1, label2, show = False, title = [], yaxis = False, color = ['purple', 'darkgreen'], baseline = True, savingname = [], target = True):
         plt.figure(figsize = (10, 8))
 
         plt.fill_between(x1, np.array(y1) - np.array(y1_std), np.array(y1) + np.array(y1_std), color=color[0], alpha=0.1)
@@ -144,11 +152,15 @@ class Plotting:
             plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1)
             plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2)
         ax = plt.subplot()
-        ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
-        ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
-        ax.set_xlim(x1.iloc[1], x1.iloc[-1])
-        ax.set_ylim(0.7,1.1)
+        if yaxis:
+            # Autoscale the y-axis
+            plt.autoscale(enable=True, axis='y', tight=False)
+        else:
+            ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
+            ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
+            ax.set_ylim(0.7,1.1)
 
+        ax.set_xlim(x1.iloc[1], x1.iloc[-1])
         xticks = [x1.iloc[1], 60, 240, 300,480]
         ax.set_xticks(xticks)  # only set ticks every second location, starting with first location
         ax.set_xticklabels([''] * len(xticks))  # Set empty labels
@@ -178,7 +190,7 @@ class Plotting:
             plt.show()
         plt.close()
     @classmethod
-    def plot_3SR_std (cls, x1, y1, y1_std, x2, y2, y2_std, x3, y3, y3_std, label1, label2, label3, show = False, title = [], color = ['c', 'm', 'burlywood'], baseline = True, savingname = [], target = True):
+    def plot_3SR_std (cls, x1, y1, y1_std, x2, y2, y2_std, x3, y3, y3_std, label1, label2, label3, show = False, yaxis = False, title = [], color = ['c', 'm', 'burlywood'], baseline = True, savingname = [], target = True):
         plt.figure(figsize = (10, 8))
 
         plt.fill_between(x1, np.array(y1) - np.array(y1_std), np.array(y1) + np.array(y1_std), color=color[0], alpha=0.1)
@@ -196,11 +208,15 @@ class Plotting:
             plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1)
             plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2)
         ax = plt.subplot()
-        ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
-        ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
-        ax.set_xlim(x1.iloc[1], x1.iloc[-1])
-        ax.set_ylim(0.7,1.1)
+        if yaxis:
+            # Autoscale the y-axis
+            plt.autoscale(enable=True, axis='y', tight=False)
+        else:
+            ax.set_yticks([0.7, 0.75, 0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.1])
+            ax.set_yticklabels(('70', '75', '80', '85', '90', '95', '100', '105', '110'))
+            ax.set_ylim(0.7,1.1)
 
+        ax.set_xlim(x1.iloc[1], x1.iloc[-1])
         xticks = [x1.iloc[1], 60, 240, 300,480]
         ax.set_xticks(xticks)  # only set ticks every second location, starting with first location
         ax.set_xticklabels([''] * len(xticks))  # Set empty labels

@@ -179,8 +179,8 @@ def exclude_outliers(df):
     # Iterate over each DataFrame in the list
     for i in range(len(df)):
         # Create a boolean mask to identify the rows to keep
-        mask = ((-50 <= df[i]['apf_left']) & (df[i]['apf_left'] <= 20) &
-                (-50 <= df[i]['apf_right']) & (df[i]['apf_right'] <= 20))
+        mask = ((-50 <= df[i]['apf_left']) & (df[i]['apf_left'] <= 20) & (df[i]['apf_left'] != None) &
+                (-50 <= df[i]['apf_right']) & (df[i]['apf_right'] <= 20) & (df[i]['apf_right'] != 0) & (df[i]['apf_right'] != None))
 
         print("Original length:", len(df[i]['apf_left']))
         # Apply the mask to filter the DataFrame and reset the index
@@ -228,20 +228,16 @@ def calculate_averages (subjects, FB_mode, param):
         fb = 1
     elif FB_mode.lower() == 'apf':
         fb = 2
-
-    for i in range(1, len(subjects)+1):
+    for i, subject in enumerate(subjects.values()):
         t_average = []
         symmetry_ratio = []
-        if not (subjects[f'S{i}'].study=='vFB' and (i == 2 or i==3 or i==4 or i==6 or i==12)):
+        if not (subject.study=='vFB' and (subject.ID =='S2_' or subject.ID=='S3_' or subject.ID=='S4_' or subject.ID== 'S6_' or subject.ID=='S12_')):
             for start_time, end_time in t_intervals:
-                filt = (subjects[f'S{i}'].__getattribute__(param)[fb]['time'] >= start_time) & (subjects[f'S{i}'].__getattribute__(param)[fb]['time'] <= end_time)
-                df_phase = subjects[f'S{i}'].__getattribute__(param)[fb][filt]
+                filt = (subject.__getattribute__(param)[fb]['time'] >= start_time) & (subject.__getattribute__(param)[fb]['time'] <= end_time)
+                df_phase = subject.__getattribute__(param)[fb][filt]
                 df_phase.reset_index(drop=True, inplace=True)
-                print(df_phase)
-
                 total_datapoints = df_phase.shape[0]
                 group_size = int(total_datapoints * 0.1)  # 10% of phase
-                num_groups = total_datapoints // group_size
 
                 # Calculate the average for each group -> 10 groups
                 for j in range(10):
@@ -261,8 +257,10 @@ def calculate_averages (subjects, FB_mode, param):
     mean_SR = []
     std_SR = []
     mean_time = []
-    print(participant_averages)
-    for k in range(len(participant_averages[1]['symmetry_ratio'])):
+    # Assuming each participant has the same number of entries in 'symmetry_ratio' and 'time_average'
+    num_entries = len(next(iter(participant_averages.values()))['symmetry_ratio'])
+    # Calculate mean and std for each entry position across participants
+    for k in range(num_entries):
         symmetry_ratios_at_position = [avg_data['symmetry_ratio'][k] for avg_data in participant_averages.values()]
         time_at_position = [avg_time['time_average'][k] for avg_time in participant_averages.values()]
         mean_SR.append(np.mean(symmetry_ratios_at_position))
@@ -279,3 +277,9 @@ def weighted_std_mean(values, weights):
     mean = np.average(values, weights=weights)
     variance = np.average((values - mean) ** 2, weights=weights)
     return np.sqrt(variance), mean
+
+def calculate_mean_interval(t_start, t_end, df, decimals = 2):
+    filt = (df['time'] >= t_start) & (df['time'] <= t_end)
+    df_filt = df[filt]
+    mean = np.mean(df_filt['SR'])
+    return np.round(mean,decimals)

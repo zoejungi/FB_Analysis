@@ -5,6 +5,9 @@ import pandas as pd
 import os
 import numpy as np
 import matplotlib.colors as mcolors
+import seaborn as sns
+from scipy.stats import pearsonr
+from scipy.stats import spearmanr
 from openpyxl import load_workbook
 
 def get_filepath (datapath, sub_id, FB, param):
@@ -186,8 +189,6 @@ def exclude_outliers(df):
         # Apply the mask to filter the DataFrame and reset the index
         df[i] = df[i][mask].reset_index(drop=True)
         print("New length:", len(df[i]['apf_left']))
-
-
 def print_in_excel_table(value, sheet_name, row_header, column_header, output_file):
     # Load the existing Excel file
     book = load_workbook(output_file)
@@ -216,7 +217,7 @@ def print_in_excel_table(value, sheet_name, row_header, column_header, output_fi
     df.iloc[row_index, column_index] = value
 
     # Write the DataFrame back to the same sheet in the Excel file
-    with pd.ExcelWriter(output_file, engine='openpyxl', mode='a', if_sheet_exists='replace') as writer:
+    with pd.ExcelWriter(output_file, engine='openpyxl', mode='a', if_sheet_exists='overlay') as writer:
         # No need to set writer.book or writer.sheets explicitly
         df.to_excel(writer, sheet_name=sheet_name)
 def calculate_averages (subjects, FB_mode, param):
@@ -283,3 +284,81 @@ def calculate_mean_interval(t_start, t_end, df, decimals = 2):
     df_filt = df[filt]
     mean = np.mean(df_filt['SR'])
     return np.round(mean,decimals)
+
+def group_data(subject, FB, ID, param):
+    if FB == 'ST':
+        j = 0
+    elif FB == 'POF':
+        j = 1
+    elif FB == 'APF':
+        j = 2
+    if param == 'apf':
+        df_NW = subject.__getattribute__(param)[j][subject.__getattribute__(param)[j]['time'] <= 60]
+        df_NW = df_NW[['gait_cycle_left', 'SR_raw']]
+        df_NW['condition'] = f'NWduring{FB}'
+        df_NW['subject_ID'] = ID
+        df_FB2 = subject.__getattribute__(param)[j][(420 <= subject.__getattribute__(param)[j]['time']) & (subject.__getattribute__(param)[j]['time'] <= 480)]
+        df_FB2 = df_FB2[['gait_cycle_left', 'SR_raw']]
+        df_FB2['condition'] = f'during{FB}'
+        df_FB2['subject_ID'] = ID
+    else:
+        df_NW = subject.__getattribute__(param)[j][subject.__getattribute__(param)[j]['time'] <= 60]
+        df_NW = df_NW[['cycle_number', 'SR_raw']]
+        df_NW['condition'] = f'NWduring{FB}'
+        df_NW['subject_ID'] = ID
+        df_FB2 = subject.__getattribute__(param)[j][(420 <= subject.__getattribute__(param)[j]['time']) & (subject.__getattribute__(param)[j]['time'] <= 480)]
+        df_FB2 = df_FB2[['cycle_number', 'SR_raw']]
+        df_FB2['condition'] = f'during{FB}'
+        df_FB2['subject_ID'] = ID
+    return pd.concat([df_NW, df_FB2], ignore_index = True)
+
+def calc_stats (df_corr, FB):
+    mean_stats = {'subject_ID': []}
+
+    columns_to_mean = ["SR_ST", "SR_POF", "SR_APF", "SR_swingtime", "SR_steplength", "SR_stepwidth", "SR_stepheight",
+                       "SR_meanGRFz", "SR_kneeflexion"]
+    for col in columns_to_mean:
+        mean_stats[f'{col}_NW'] = []
+        mean_stats[col] = []
+
+    for col in columns_to_mean:
+        # Calculate the mean of the last 10 gait cycles for the column where condition is met'
+        mean_stats[f'{col}_NW'].append(df_corr[df_corr['condition'] == 'NW'+FB][col].tail(10).mean())
+        mean_stats[col].append(df_corr[df_corr['condition'] == FB][col].tail(10).mean())
+    mean_stats['subject_ID'] = df_corr['subject_ID'][1]
+    return pd.DataFrame(mean_stats)
+
+def save_corrstats(df, path, FB=False):
+    df = pd.concat(df)
+    if FB == False:
+        df = df.sort_values(by=['condition', 'subject_ID', 'cycle_number'])
+        df.reset_index(drop=True, inplace=True)
+        df.to_csv(path, index=False)
+    else:
+        stats_path = os.path.join(path, 'stats' + FB + '.csv')
+        df.to_csv(stats_path, index=False)
+def calc_corrcoeffs(df, FB_mode, output_file):
+    df_ST = df[(df['condition'] == 'NWduringST') | (df['condition'] == 'duringST')]
+    df_POF = df[(df['condition'] == 'NWduringPOF') | (df['condition'] == 'duringPOF')]
+    df_APF = df[(df['condition'] == 'NWduringAPF') | (df['condition'] == 'duringAPF')]
+
+    columns_ST = df_ST.columns.drop(['condition', 'subject_ID', 'cycle_number', 'SR_ST'])
+    for i in range(len(columns_ST)):
+        pearson_ST = pearsonr(df_ST['SR_ST'], df_ST[columns_ST[i]])[0]
+        spearman_ST = spearmanr(df_ST['SR_ST'], df_ST[columns_ST[i]])[0]
+        print_in_excel_table(pearson_ST, 'Correlation', FB_mode + ' pearsons', 'STvs'+columns_ST[i], output_file)
+        print_in_excel_table(spearman_ST, 'Correlation', FB_mode + ' spearmans', 'STvs' + columns_ST[i], output_file)
+
+    columns_POF = df_POF.columns.drop(['condition', 'subject_ID', 'cycle_number', 'SR_POF'])
+    for i in range(len(columns_POF)):
+        pearson_POF = pearsonr(df_POF['SR_POF'], df_POF[columns_POF[i]])[0]
+        spearman_POF = spearmanr(df_POF['SR_POF'], df_POF[columns_POF[i]])[0]
+        print_in_excel_table(pearson_POF, 'Correlation', FB_mode + ' pearsons', 'POFvs' + columns_POF[i], output_file)
+        print_in_excel_table(spearman_POF, 'Correlation', FB_mode + ' spearmans', 'POFvs' + columns_POF[i], output_file)
+
+    columns_APF = df_APF.columns.drop(['condition', 'subject_ID', 'cycle_number', 'SR_APF'])
+    for i in range(len(columns_APF)):
+        pearson_APF = pearsonr(df_APF['SR_APF'], df_APF[columns_APF[i]])[0]
+        spearman_APF = spearmanr(df_APF['SR_APF'], df_APF[columns_APF[i]])[0]
+        print_in_excel_table(pearson_APF, 'Correlation', FB_mode + ' pearsons', 'APFvs' + columns_APF[i], output_file)
+        print_in_excel_table(spearman_APF, 'Correlation', FB_mode + ' spearmans', 'APFvs' + columns_APF[i], output_file)

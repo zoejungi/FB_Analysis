@@ -245,3 +245,91 @@ class Plotting:
         if show:
             plt.show()
         plt.close()
+    @classmethod
+    def plot_correlation(cls, df, show = False, save = False):
+        df_ST = df[(df['condition'] == 'NWduringST') | (df['condition'] == 'duringST')]
+        df_POF = df[(df['condition'] == 'NWduringPOF') | (df['condition'] == 'duringPOF')]
+        df_APF = df[(df['condition'] == 'NWduringAPF') | (df['condition'] == 'duringAPF')]
+
+        columns_ST = df_ST.columns.drop(['condition', 'subject_ID', 'cycle_number', 'SR_ST'])
+        columns_POF = df_POF.columns.drop(['condition', 'subject_ID', 'cycle_number', 'SR_POF'])
+        columns_APF = df_APF.columns.drop(['condition', 'subject_ID', 'cycle_number', 'SR_APF'])
+
+        for i in range(len(columns_ST)):
+            plt.figure(figsize = (8,8))
+            plt.scatter(df_ST[df_ST["condition"] == "duringST"]["SR_ST"],df_ST[df_ST["condition"] == "duringST"][columns_ST[i]], marker="o", facecolors='none', edgecolors='r', s=1, label="FB2")
+            plt.scatter(df_ST[df_ST["condition"] == "NWduringST"]["SR_ST"],df_ST[df_ST["condition"] == "NWduringST"][columns_ST[i]], marker="o", facecolors='none', edgecolors='b', s=1, label="NW")
+
+            plt.xlabel("ST SR", fontsize=cls.f)
+            plt.ylabel(columns_ST[i], fontsize=cls.f)
+            plt.legend(fontsize=cls.f, bbox_to_anchor=(0.65, 1.1), loc='upper left', borderaxespad=0.)
+            plt.ylim(0.5, 2.3)
+            plt.xlim(0, 3)
+            plt.xticks(fontsize=cls.f)
+            plt.yticks(fontsize=cls.f)
+
+            # Linear regression
+            coeffs = np.polyfit(df_ST["SR_ST"], df_ST[columns_ST[i]], 1)
+            poly = np.poly1d(coeffs)
+            plt.plot(df_ST["SR_ST"], poly(df_ST["SR_ST"]), color='black', label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
+            if save:
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\CorrST_{columns_ST[i]}.png')
+            if show:
+                plt.show()
+            plt.close()
+
+        for i in range(len(columns_POF)):
+            plt.figure(figsize=(8, 8))
+            plt.scatter(df_POF[df_POF["condition"] == "duringPOF"]["SR_POF"],
+                        df_POF[df_POF["condition"] == "duringPOF"][columns_POF[i]], marker="o", facecolors='none',
+                        edgecolors='r', s=1, label="FB2")
+            plt.scatter(df_POF[df_POF["condition"] == "NWduringPOF"]["SR_POF"],
+                        df_POF[df_POF["condition"] == "NWduringPOF"][columns_POF[i]], marker="o", facecolors='none',
+                        edgecolors='b', s=1, label="NW")
+
+            plt.xlabel("POF SR", fontsize=cls.f)
+            plt.ylabel(columns_POF[i], fontsize=cls.f)
+            plt.legend(fontsize=cls.f, bbox_to_anchor=(0.65, 1.1), loc='upper left', borderaxespad=0.)
+            plt.ylim(0.5, 2.3)
+            plt.xlim(0, 3)
+            plt.xticks(fontsize=cls.f)
+            plt.yticks(fontsize=cls.f)
+
+            # Linear regression
+            coeffs = np.polyfit(df_POF["SR_POF"], df_POF[columns_POF[i]], 1)
+            poly = np.poly1d(coeffs)
+            plt.plot(df_POF["SR_POF"], poly(df_POF["SR_POF"]), color='black',
+                     label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
+            if save:
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\CorrPOF_{columns_POF[i]}.png')
+            if show:
+                plt.show()
+            plt.close()
+
+        for i in range(len(columns_APF)):
+            plt.figure(figsize=(8, 8))
+            plt.scatter(df_APF[df_APF["condition"] == "duringAPF"]["SR_APF"],
+                        df_APF[df_APF["condition"] == "duringAPF"][columns_APF[i]], marker="o", facecolors='none',
+                        edgecolors='r', s=1, label="FB2")
+            plt.scatter(df_APF[df_APF["condition"] == "NWduringAPF"]["SR_APF"],
+                        df_APF[df_APF["condition"] == "NWduringAPF"][columns_APF[i]], marker="o", facecolors='none',
+                        edgecolors='b', s=1, label="NW")
+
+            plt.xlabel("APF SR", fontsize=cls.f)
+            plt.ylabel(columns_APF[i], fontsize=cls.f)
+            plt.legend(fontsize=cls.f, bbox_to_anchor=(0.65, 1.1), loc='upper left', borderaxespad=0.)
+            plt.ylim(0.5, 2.3)
+            plt.xlim(0, 3)
+            plt.xticks(fontsize=cls.f)
+            plt.yticks(fontsize=cls.f)
+
+            # Linear regression
+            coeffs = np.polyfit(df_APF["SR_APF"], df_APF[columns_APF[i]], 1)
+            poly = np.poly1d(coeffs)
+            plt.plot(df_APF["SR_APF"], poly(df_APF["SR_APF"]), color='black',
+                     label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
+            if save:
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\CorrAPF_{columns_APF[i]}.png')
+            if show:
+                plt.show()
+            plt.close()

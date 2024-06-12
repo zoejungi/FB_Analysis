@@ -46,8 +46,8 @@ phases = ['NW', 'FB1', 'noFB1', 'FB2', 'noFB2']
 for i in range(1, n_hFB+1):
 
     # write mean per t-phase in excel_file (only during corresponding FB)
-    #for j in range(len(phases)):
-        #print_in_excel_table(calculate_mean_interval(t_start = t[j], t_end = t[j+1], df = subjects_hFB[f'S{i}'].st[0]), 'Indiv', f'hFB S{i}', f'{phases[j]} (duringST)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+    for j in range(len(phases)):
+        print_in_excel_table(calculate_mean_interval(t_start = t[j], t_end = t[j+1], df = subjects_hFB[f'S{i}'].st[0]), 'Indiv', f'hFB S{i}', f'{phases[j]} (duringST)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
         #print_in_excel_table(calculate_mean_interval(t_start = t[j], t_end = t[j+1], df = subjects_hFB[f'S{i}'].pof[1]), 'Indiv', f'hFB S{i}', f'{phases[j]} (duringPOF)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
         #print_in_excel_table(calculate_mean_interval(t_start = t[j], t_end = t[j+1], df = subjects_hFB[f'S{i}'].apf[2]), 'Indiv', f'hFB S{i}', f'{phases[j]} (duringAPF)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
 
@@ -56,27 +56,27 @@ for i in range(1, n_hFB+1):
         if j == 0:
             subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].st[j]['time'], subjects_hFB[f'S{i}'].st[j]['SR_SMA5'], label=f'S{i} SR$_{{ST}}$', savingname=f'hFB_S{i}_ST_SR')
             subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].st[j]['time'], subjects_hFB[f'S{i}'].st[j]['ST_left'], subjects_hFB[f'S{i}'].st[j]['ST_right'], ylabel='ST [s]', savingname=f'hFB_S{i}_ST_lr')
-        else:
-            subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].st[j]['time'], subjects_hFB[f'S{i}'].st[j]['SR_SMA5'], label=f'S{i} SR$_{{ST}}$', savingname=f'hFB_S{i}_STduring{j}_SR', target=False)
-            subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].st[j]['time'], subjects_hFB[f'S{i}'].st[j]['ST_left'], subjects_hFB[f'S{i}'].st[j]['ST_right'], ylabel='ST [s]', savingname=f'hFB_S{i}_STduring{j}_lr')
+        #else:
+            #subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].st[j]['time'], subjects_hFB[f'S{i}'].st[j]['SR_SMA5'], label=f'S{i} SR$_{{ST}}$', savingname=f'hFB_S{i}_STduring{j}_SR', target=False)
+            #subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].st[j]['time'], subjects_hFB[f'S{i}'].st[j]['ST_left'], subjects_hFB[f'S{i}'].st[j]['ST_right'], ylabel='ST [s]', savingname=f'hFB_S{i}_STduring{j}_lr')
 
     # POF
-    for j, df in enumerate(subjects_hFB[f'S{i}'].pof):
-        if j == 1:
-            subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].pof[j]['time'], subjects_hFB[f'S{i}'].pof[j]['SR_SMA5'], label=f'S{i} SR$_{{POF}}$', savingname=f'hFB_S{i}_POF_SR')
-            subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].pof[j]['time'], subjects_hFB[f'S{i}'].pof[j]['POF_left_SMA5'], subjects_hFB[f'S{i}'].pof[j]['POF_right_SMA5'], ylabel='POF [N]', savingname=f'hFB_S{i}_POF_lr')
+    #for j, df in enumerate(subjects_hFB[f'S{i}'].pof):
+        #if j == 1:
+            #subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].pof[j]['time'], subjects_hFB[f'S{i}'].pof[j]['SR_SMA5'], label=f'S{i} SR$_{{POF}}$', savingname=f'hFB_S{i}_POF_SR')
+            #subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].pof[j]['time'], subjects_hFB[f'S{i}'].pof[j]['POF_left_SMA5'], subjects_hFB[f'S{i}'].pof[j]['POF_right_SMA5'], ylabel='POF [N]', savingname=f'hFB_S{i}_POF_lr')
 
-        else:
-            subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].pof[j]['time'], subjects_hFB[f'S{i}'].pof[j]['SR_SMA5'], label=f'S{i} SR$_{{POF}}$', savingname=f'hFB_S{i}_POFduring{j}_SR', target=False)
-            subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].pof[j]['time'], subjects_hFB[f'S{i}'].pof[j]['POF_left_SMA5'], subjects_hFB[f'S{i}'].pof[j]['POF_right_SMA5'], ylabel='POF [N]', savingname=f'hFB_S{i}_POFduring{j}_lr')
+        #else:
+            #subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].pof[j]['time'], subjects_hFB[f'S{i}'].pof[j]['SR_SMA5'], label=f'S{i} SR$_{{POF}}$', savingname=f'hFB_S{i}_POFduring{j}_SR', target=False)
+            #subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].pof[j]['time'], subjects_hFB[f'S{i}'].pof[j]['POF_left_SMA5'], subjects_hFB[f'S{i}'].pof[j]['POF_right_SMA5'], ylabel='POF [N]', savingname=f'hFB_S{i}_POFduring{j}_lr')
     # APF
-    for j, df in enumerate(subjects_hFB[f'S{i}'].apf):
-        if j == 2:
-            subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].apf[j]['time'], subjects_hFB[f'S{i}'].apf[j]['SR_SMA5'], label=f'S{i} SR$_{{APF}}$', savingname=f'hFB_S{i}_APF_SR', yaxis = True)
-            subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].apf[j]['time'], subjects_hFB[f'S{i}'].apf[j]['apf_left'], subjects_hFB[f'S{i}'].apf[j]['apf_right'], ylabel='maxAPF [°]', savingname=f'hFB_S{i}_APF_lr')
-        else:
-            subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].apf[j]['time'], subjects_hFB[f'S{i}'].apf[j]['SR_SMA5'], label=f'S{i} SR$_{{APF}}$', savingname=f'hFB_S{i}_APFduring{j}_SR', yaxis = True, target = False)
-            subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].apf[j]['time'], subjects_hFB[f'S{i}'].apf[j]['apf_left'], subjects_hFB[f'S{i}'].apf[j]['apf_right'], ylabel='maxAPF [°]', savingname=f'hFB_S{i}_APFduring{j}_lr')
+    #for j, df in enumerate(subjects_hFB[f'S{i}'].apf):
+        #if j == 2:
+            #subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].apf[j]['time'], subjects_hFB[f'S{i}'].apf[j]['SR_SMA5'], label=f'S{i} SR$_{{APF}}$', savingname=f'hFB_S{i}_APF_SR', yaxis = True)
+            #subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].apf[j]['time'], subjects_hFB[f'S{i}'].apf[j]['apf_left'], subjects_hFB[f'S{i}'].apf[j]['apf_right'], ylabel='maxAPF [°]', savingname=f'hFB_S{i}_APF_lr')
+        #else:
+            #subjects_hFB[f'S{i}'].plot_SR(subjects_hFB[f'S{i}'].apf[j]['time'], subjects_hFB[f'S{i}'].apf[j]['SR_SMA5'], label=f'S{i} SR$_{{APF}}$', savingname=f'hFB_S{i}_APFduring{j}_SR', yaxis = True, target = False)
+            #subjects_hFB[f'S{i}'].plot_leftvsright(subjects_hFB[f'S{i}'].apf[j]['time'], subjects_hFB[f'S{i}'].apf[j]['apf_left'], subjects_hFB[f'S{i}'].apf[j]['apf_right'], ylabel='maxAPF [°]', savingname=f'hFB_S{i}_APFduring{j}_lr')
 
     '''# Swingtime
     for j, df in enumerate(subjects_hFB[f'S{i}'].swingtime):
@@ -107,37 +107,37 @@ print('all individual plots done for all subjects hFB')
 for i in range(1, n_vFB+1):
     if i != 2 and i != 3 and i != 4 and i != 6 and i != 12:
         # write mean per t-phase in excel_file (only during corresponding FB)
-        # for j in range(len(phases)):
-            # print_in_excel_table(calculate_mean_interval(t_start=t[j], t_end=t[j + 1], df = subjects_vFB[f'S{i}'].st[0]), 'Indiv', f'vFB S{i}', f'{phases[j]} (duringST)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
-            # print_in_excel_table(calculate_mean_interval(t_start=t[j], t_end=t[j + 1], df = subjects_vFB[f'S{i}'].pof[1]), 'Indiv', f'vFB S{i}', f'{phases[j]} (duringPOF)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
-            # print_in_excel_table(calculate_mean_interval(t_start=t[j], t_end=t[j + 1], df = subjects_vFB[f'S{i}'].apf[2]), 'Indiv', f'vFB S{i}', f'{phases[j]} (duringAPF)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+        for j in range(len(phases)):
+            print_in_excel_table(calculate_mean_interval(t_start=t[j], t_end=t[j + 1], df = subjects_vFB[f'S{i}'].st[0]), 'Indiv', f'vFB S{i}', f'{phases[j]} (duringST)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+            #print_in_excel_table(calculate_mean_interval(t_start=t[j], t_end=t[j + 1], df = subjects_vFB[f'S{i}'].pof[1]), 'Indiv', f'vFB S{i}', f'{phases[j]} (duringPOF)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
+            #print_in_excel_table(calculate_mean_interval(t_start=t[j], t_end=t[j + 1], df = subjects_vFB[f'S{i}'].apf[2]), 'Indiv', f'vFB S{i}', f'{phases[j]} (duringAPF)', r"C:\\Users\\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx")
 
         # ST
         for j, df in enumerate(subjects_vFB[f'S{i}'].st):
             if j == 0:
                 subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].st[j]['time'], subjects_vFB[f'S{i}'].st[j]['SR_SMA5'], label=f'S{i} SR$_{{ST}}$', savingname=f'vFB_S{i}_ST_SR')
                 subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].st[j]['time'], subjects_vFB[f'S{i}'].st[j]['ST_left'], subjects_vFB[f'S{i}'].st[j]['ST_right'], ylabel='ST [s]', savingname=f'vFB_S{i}_ST_lr')
-            else:
-                subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].st[j]['time'], subjects_vFB[f'S{i}'].st[j]['SR_SMA5'], label=f'S{i} SR$_{{ST}}$', savingname=f'vFB_S{i}_STduring{j}_SR', target = False)
-                subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].st[j]['time'], subjects_vFB[f'S{i}'].st[j]['ST_left'], subjects_vFB[f'S{i}'].st[j]['ST_right'], ylabel='ST [s]', savingname=f'vFB_S{i}_STduring{j}_lr')
+            #else:
+                #subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].st[j]['time'], subjects_vFB[f'S{i}'].st[j]['SR_SMA5'], label=f'S{i} SR$_{{ST}}$', savingname=f'vFB_S{i}_STduring{j}_SR', target = False)
+                #subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].st[j]['time'], subjects_vFB[f'S{i}'].st[j]['ST_left'], subjects_vFB[f'S{i}'].st[j]['ST_right'], ylabel='ST [s]', savingname=f'vFB_S{i}_STduring{j}_lr')
 
         # POF
-        for j, df in enumerate(subjects_vFB[f'S{i}'].pof):
-            if j == 1:
-                subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].pof[j]['time'], subjects_vFB[f'S{i}'].pof[j]['SR_SMA5'], label=f'S{i} SR$_{{POF}}$', savingname=f'vFB_S{i}_POF_SR')
-                subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].pof[j]['time'], subjects_vFB[f'S{i}'].pof[j]['POF_left_SMA5'], subjects_vFB[f'S{i}'].pof[j]['POF_right_SMA5'], ylabel='POF [N]', savingname=f'vFB_S{i}_POF_lr')
-            else:
-                subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].pof[j]['time'], subjects_vFB[f'S{i}'].pof[j]['SR_SMA5'], label=f'S{i} SR$_{{POF}}$', savingname=f'vFB_S{i}_POFduring{j}_SR', target = False)
-                subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].pof[j]['time'], subjects_vFB[f'S{i}'].pof[j]['POF_left_SMA5'], subjects_vFB[f'S{i}'].pof[j]['POF_right_SMA5'], ylabel='POF [N]', savingname=f'vFB_S{i}_POFduring{j}_lr')
+        #for j, df in enumerate(subjects_vFB[f'S{i}'].pof):
+            #if j == 1:
+                #subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].pof[j]['time'], subjects_vFB[f'S{i}'].pof[j]['SR_SMA5'], label=f'S{i} SR$_{{POF}}$', savingname=f'vFB_S{i}_POF_SR')
+                #subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].pof[j]['time'], subjects_vFB[f'S{i}'].pof[j]['POF_left_SMA5'], subjects_vFB[f'S{i}'].pof[j]['POF_right_SMA5'], ylabel='POF [N]', savingname=f'vFB_S{i}_POF_lr')
+            #else:
+                #subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].pof[j]['time'], subjects_vFB[f'S{i}'].pof[j]['SR_SMA5'], label=f'S{i} SR$_{{POF}}$', savingname=f'vFB_S{i}_POFduring{j}_SR', target = False)
+                #subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].pof[j]['time'], subjects_vFB[f'S{i}'].pof[j]['POF_left_SMA5'], subjects_vFB[f'S{i}'].pof[j]['POF_right_SMA5'], ylabel='POF [N]', savingname=f'vFB_S{i}_POFduring{j}_lr')
 
         # APF
-        for j, df in enumerate(subjects_vFB[f'S{i}'].apf):
-            if j == 2:
-                subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].apf[j]['time'], subjects_vFB[f'S{i}'].apf[j]['SR_SMA5'], label=f'S{i} SR$_{{APF}}$', savingname=f'vFB_S{i}_APF_SR', yaxis = True)
-                subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].apf[j]['time'], subjects_vFB[f'S{i}'].apf[j]['apf_left'], subjects_vFB[f'S{i}'].apf[j]['apf_right'], ylabel='maxAPF [°]', savingname=f'vFB_S{i}_APF_lr')
-            else:
-                subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].apf[j]['time'], subjects_vFB[f'S{i}'].apf[j]['SR_SMA5'], label=f'S{i} SR$_{{APF}}$', savingname=f'vFB_S{i}_APFduring{j}_SR', yaxis = True, target = False)
-                subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].apf[j]['time'], subjects_vFB[f'S{i}'].apf[j]['apf_left'], subjects_vFB[f'S{i}'].apf[j]['apf_right'], ylabel='maxAPF [°]', savingname=f'vFB_S{i}_APFduring{j}_lr')
+        #for j, df in enumerate(subjects_vFB[f'S{i}'].apf):
+            #if j == 2:
+                #subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].apf[j]['time'], subjects_vFB[f'S{i}'].apf[j]['SR_SMA5'], label=f'S{i} SR$_{{APF}}$', savingname=f'vFB_S{i}_APF_SR', yaxis = True)
+                #subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].apf[j]['time'], subjects_vFB[f'S{i}'].apf[j]['apf_left'], subjects_vFB[f'S{i}'].apf[j]['apf_right'], ylabel='maxAPF [°]', savingname=f'vFB_S{i}_APF_lr')
+            #else:
+                #subjects_vFB[f'S{i}'].plot_SR(subjects_vFB[f'S{i}'].apf[j]['time'], subjects_vFB[f'S{i}'].apf[j]['SR_SMA5'], label=f'S{i} SR$_{{APF}}$', savingname=f'vFB_S{i}_APFduring{j}_SR', yaxis = True, target = False)
+                #subjects_vFB[f'S{i}'].plot_leftvsright(subjects_vFB[f'S{i}'].apf[j]['time'], subjects_vFB[f'S{i}'].apf[j]['apf_left'], subjects_vFB[f'S{i}'].apf[j]['apf_right'], ylabel='maxAPF [°]', savingname=f'vFB_S{i}_APFduring{j}_lr')
 
         '''# Swingtime
         for j, df in enumerate(subjects_vFB[f'S{i}'].swingtime):
@@ -210,9 +210,9 @@ Plotting.plot_2SR_std(hFB_pof_t_duringPOF, hFB_pof_SR_duringPOF, hFB_pof_SR_std_
 Plotting.plot_2SR_std(hFB_apf_t_duringAPF, hFB_apf_SR_duringAPF, hFB_apf_SR_std_duringAPF, vFB_apf_t_duringAPF, vFB_apf_SR_duringAPF, vFB_apf_SR_std_duringAPF, 'APF during hFB', 'APF during vFB', yaxis = True, show = True, savingname='comp_SR_APF')
 
 # comparison plots only responders and responders vs nonresponders
-hFB_res_ST = ['S2', 'S3', 'S5', 'S6', 'S7', 'S11', 'S15', 'S16', 'S17']
-hFB_res_POF = ['S1', 'S3', 'S5', 'S7', 'S8', 'S11', 'S15', 'S16', 'S18']
-hFB_res_APF = ['S1', 'S4', 'S7', 'S10', 'S15', 'S17']
+hFB_res_ST = ['S2', 'S3', 'S5', 'S6', 'S7', 'S9', 'S11', 'S15', 'S16', 'S17']
+hFB_res_POF = ['S1', 'S3', 'S5', 'S7', 'S8', 'S9', 'S11', 'S14', 'S15', 'S16', 'S17', 'S18']
+hFB_res_APF = ['S4', 'S8', 'S9', 'S10', 'S15', 'S16', 'S18']
 
 responders_hFB_ST = {subject: subjects_hFB[subject] for subject in hFB_res_ST if subject in subjects_hFB}
 responders_hFB_POF = {subject: subjects_hFB[subject] for subject in hFB_res_POF if subject in subjects_hFB}
@@ -221,9 +221,9 @@ nonresponders_hFB_ST = {subject: subjects_hFB[subject] for subject in subjects_h
 nonresponders_hFB_POF = {subject: subjects_hFB[subject] for subject in subjects_hFB if not subject in hFB_res_POF}
 nonresponders_hFB_APF = {subject: subjects_hFB[subject] for subject in subjects_hFB if not subject in hFB_res_APF}
 
-vFB_res_ST = ['S5', 'S7', 'S11', 'S13', 'S14', 'S16', 'S17', 'S18', 'S19', 'S20', 'S21', 'S22', 'S23', 'S24']
-vFB_res_POF = ['S7', 'S10', 'S11', 'S13', 'S14', 'S17', 'S18', 'S19', 'S22', 'S23']
-vFB_res_APF = ['S1', 'S11', 'S17', 'S18', 'S23']
+vFB_res_ST = ['S1', 'S5', 'S7', 'S11', 'S13', 'S14', 'S16', 'S17', 'S18', 'S19', 'S20', 'S21', 'S22', 'S23', 'S24']
+vFB_res_POF = ['S1', 'S7', 'S9', 'S10', 'S11', 'S13', 'S14', 'S16','S17', 'S18', 'S19', 'S20', 'S22', 'S23', 'S24']
+vFB_res_APF = ['S7', 'S11', 'S14','S17', 'S18', 'S20', 'S24']
 
 responders_vFB_ST = {subject: subjects_vFB[subject] for subject in vFB_res_ST if subject in subjects_vFB}
 responders_vFB_POF = {subject: subjects_vFB[subject] for subject in vFB_res_POF if subject in subjects_vFB}

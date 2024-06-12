@@ -1,6 +1,8 @@
 # Class subject
 # in: subject id, FB given on ST/APF/POF
+import pandas as pd
 
+import Plotting
 from helperfunctions import *
 from Plotting import *
 
@@ -541,4 +543,125 @@ class Subject (Plotting):
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for stepwidth")
 
         return df_step
+
+    def calc_corrandstats(self):
+        # make df for correlation and for stats. -> row headers = condition (NW, duringST, during APF, during POF)
+        #  -> column headers = subject ID, cycle number, SR_raw of all gait params.
+
+        df_ST = pd.concat([group_data(self, 'ST', self.ID[:-1], 'st'), group_data(self, 'POF', self.ID[:-1], 'st'),
+                           group_data(self, 'APF', self.ID[:-1], 'st')], ignore_index=True)
+        df_ST = df_ST.rename(columns={'SR_raw': 'SR_ST'})
+
+        df_POF = pd.concat([group_data(self, 'ST', self.ID[:-1], 'pof'), group_data(self, 'POF', self.ID[:-1], 'pof'),
+                            group_data(self, 'APF', self.ID[:-1], 'pof')], ignore_index=True)
+        df_POF = df_POF.rename(columns={'SR_raw': 'SR_POF'})
+
+        df_APF = pd.concat([group_data(self, 'ST', self.ID[:-1], 'apf'), group_data(self, 'POF', self.ID[:-1], 'apf'),
+                            group_data(self, 'APF', self.ID[:-1], 'apf')], ignore_index=True)
+        df_APF = df_APF.rename(columns={'SR_raw': 'SR_APF'})
+        df_APF = df_APF.rename(columns={'gait_cycle_left': 'cycle_number'})
+
+        df_swingtime = pd.concat(
+            [group_data(self, 'ST', self.ID[:-1], 'swingtime'), group_data(self, 'POF', self.ID[:-1], 'swingtime'),
+             group_data(self, 'APF', self.ID[:-1], 'swingtime')], ignore_index=True)
+        df_swingtime = df_swingtime.rename(columns={'SR_raw': 'SR_swingtime'})
+
+        df_steplength = pd.concat(
+            [group_data(self, 'ST', self.ID[:-1], 'steplength'), group_data(self, 'POF', self.ID[:-1], 'steplength'),
+             group_data(self, 'APF', self.ID[:-1], 'steplength')], ignore_index=True)
+        df_steplength = df_steplength.rename(columns={'SR_raw': 'SR_steplength'})
+
+        df_stepwidth = pd.concat(
+            [group_data(self, 'ST', self.ID[:-1], 'stepwidth'), group_data(self, 'POF', self.ID[:-1], 'stepwidth'),
+             group_data(self, 'APF', self.ID[:-1], 'stepwidth')], ignore_index=True)
+        df_stepwidth = df_stepwidth.rename(columns={'SR_raw': 'SR_stepwidth'})
+
+        df_stepheight = pd.concat(
+            [group_data(self, 'ST', self.ID[:-1], 'stepheight'), group_data(self, 'POF', self.ID[:-1], 'stepheight'),
+             group_data(self, 'APF', self.ID[:-1], 'stepheight')], ignore_index=True)
+        df_stepheight = df_stepheight.rename(columns={'SR_raw': 'SR_stepheight'})
+
+        df_meanGRFz = pd.concat([group_data(self, 'ST', self.ID[:-1], 'GRFz'), group_data(self, 'POF', self.ID[:-1], 'GRFz'),
+                                 group_data(self, 'APF', self.ID[:-1], 'GRFz')], ignore_index=True)
+        df_meanGRFz = df_meanGRFz.rename(columns={'SR_raw': 'SR_meanGRFz'})
+
+        df_kneeflexion = pd.concat(
+            [group_data(self, 'ST', self.ID[:-1], 'kneeflexion'), group_data(self, 'POF', self.ID[:-1], 'kneeflexion'),
+             group_data(self, 'APF', self.ID[:-1], 'kneeflexion')], ignore_index=True)
+        df_kneeflexion = df_kneeflexion.rename(columns={'SR_raw': 'SR_kneeflexion'})
+
+        df_correlation = pd.merge(df_ST, df_POF, on=["condition", "subject_ID", "cycle_number"])
+        df_correlation = pd.merge(df_correlation, df_APF, on=["condition", "subject_ID", "cycle_number"])
+        df_correlation = pd.merge(df_correlation, df_swingtime, on=["condition", "subject_ID", "cycle_number"])
+        df_correlation = pd.merge(df_correlation, df_steplength, on=["condition", "subject_ID", "cycle_number"])
+        df_correlation = pd.merge(df_correlation, df_stepheight, on=["condition", "subject_ID", "cycle_number"])
+        df_correlation = pd.merge(df_correlation, df_stepwidth, on=["condition", "subject_ID", "cycle_number"])
+        df_correlation = pd.merge(df_correlation, df_meanGRFz, on=["condition", "subject_ID", "cycle_number"])
+        df_correlation = pd.merge(df_correlation, df_kneeflexion, on=["condition", "subject_ID", "cycle_number"])
+
+        df_correlation.replace([np.inf, -np.inf], np.nan, inplace=True)
+        df_correlation.dropna(inplace=True)
+        # Rearrange the column headers to put 'subject_ID' and 'condition' to the front
+        columns = df_correlation.columns.tolist()
+        df_correlation = df_correlation[['subject_ID', 'condition'] + [col for col in columns if col not in ['subject_ID', 'condition']]]
+
+        # take the mean of the 10 last values of FB2 phase for statistical analysis
+        mean_stats_ST = calc_stats(df_correlation, 'duringST')
+        mean_stats_POF = calc_stats(df_correlation, 'duringPOF')
+        mean_stats_APF = calc_stats(df_correlation, 'duringAPF')
+
+        return df_correlation, mean_stats_ST, mean_stats_POF, mean_stats_APF
+
+
+
+# Assuming correlation_file is the path to the correlation file
+correlation_path = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\correlation.csv'
+stats_path = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB'
+
+# Check if the correlation file exists
+if not os.path.exists(correlation_path):
+    # create all subjects and calculate all gait parameters for all
+    n_hFB = 3
+    subjects_hFB = {}
+
+    for i in range(1, n_hFB + 1):
+        subjects_hFB[f'S{i}'] = Subject(f'S{i}_', "hFB", r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data')
+    print('dictionary subjects hFB created')
+
+    for i in range(1, n_hFB + 1):
+        subjects_hFB[f'S{i}'].st = subjects_hFB[f'S{i}'].ST()
+        subjects_hFB[f'S{i}'].pof = subjects_hFB[f'S{i}'].POF()
+        subjects_hFB[f'S{i}'].apf = subjects_hFB[f'S{i}'].maxAPF()
+        subjects_hFB[f'S{i}'].swingtime = subjects_hFB[f'S{i}'].swingTime()
+        subjects_hFB[f'S{i}'].steplength = subjects_hFB[f'S{i}'].stepLength()
+        subjects_hFB[f'S{i}'].stepheight = subjects_hFB[f'S{i}'].stepHeight()
+        subjects_hFB[f'S{i}'].stepwidth = subjects_hFB[f'S{i}'].stepWidth()
+        subjects_hFB[f'S{i}'].GRFz = subjects_hFB[f'S{i}'].meanGRFz()
+        subjects_hFB[f'S{i}'].kneeflexion = subjects_hFB[f'S{i}'].maxKneeflexion()
+    print('gait parameters calculated for all subjects hFB')
+
+    df_correlation = []
+    df_statsST = []
+    df_statsPOF = []
+    df_statsAPF = []
+
+    for i in range(1, n_hFB+1):
+        subjects_hFB[f'S{i}'].correlation, subjects_hFB[f'S{i}'].statsST, subjects_hFB[f'S{i}'].statsPOF, subjects_hFB[f'S{i}'].statsAPF = subjects_hFB[f'S{i}'].calc_corrandstats()
+        df_correlation.append(subjects_hFB[f'S{i}'].correlation)
+        df_statsST.append(subjects_hFB[f'S{i}'].statsST)
+        df_statsPOF.append(subjects_hFB[f'S{i}'].statsPOF)
+        df_statsAPF.append(subjects_hFB[f'S{i}'].statsAPF)
+
+    save_corrstats(df_correlation, correlation_path)
+    save_corrstats(df_statsST, stats_path, FB = 'ST')
+    save_corrstats(df_statsPOF, stats_path, FB = 'POF')
+    save_corrstats(df_statsAPF, stats_path, FB = 'APF')
+    print('corr/stats done individually and saved as a group.csv')
+else:
+    df_correlation = pd.read_csv(correlation_path)
+
+#calc_corrcoeffs (df_correlation, 'hFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
+Plotting.plot_correlation(df_correlation,show=True)
+
+
 

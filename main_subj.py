@@ -272,3 +272,58 @@ Plotting.plot_3SR_std(vFBres_st_t_duringST, vFBres_st_SR_duringST, vFBres_st_SR_
 Plotting.plot_2SR_std(hFBres_st_t_duringST, hFBres_st_SR_duringST, hFBres_st_SR_std_duringST, vFBres_st_t_duringST, vFBres_st_SR_duringST, vFBres_st_SR_std_duringST, 'ST during hFB', 'ST during vFB', show = True, savingname='comp_SR_ST_res')
 Plotting.plot_2SR_std(hFBres_pof_t_duringPOF, hFBres_pof_SR_duringPOF, hFBres_pof_SR_std_duringPOF, vFBres_pof_t_duringPOF, vFBres_pof_SR_duringPOF, vFBres_pof_SR_std_duringPOF, 'POF during hFB', 'POF during vFB', show = True, savingname='comp_SR_POF_res')
 Plotting.plot_2SR_std(hFBres_apf_t_duringAPF, hFBres_apf_SR_duringAPF, hFBres_apf_SR_std_duringAPF, vFBres_apf_t_duringAPF, vFBres_apf_SR_duringAPF, vFBres_apf_SR_std_duringAPF, 'APF during hFB', 'APF during vFB', yaxis = True, show = True, savingname='comp_SR_APF_res')
+
+# correlation hFB and vFB and save stats files all
+
+correlation_path_hFB = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\correlation.csv'
+stats_path_hFB = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB'
+correlation_path_vFB = r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\correlation.csv'
+stats_path_vFB = r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB'
+
+# Check if the correlation file exists
+if not os.path.exists(correlation_path_hFB):
+    df_correlation_hFB = []
+    df_statsST_hFB = []
+    df_statsPOF_hFB = []
+    df_statsAPF_hFB = []
+    for i in range(1, n_hFB+1):
+        subjects_hFB[f'S{i}'].correlation, subjects_hFB[f'S{i}'].statsST, subjects_hFB[f'S{i}'].statsPOF, subjects_hFB[f'S{i}'].statsAPF = subjects_hFB[f'S{i}'].calc_corrandstats()
+        df_correlation_hFB.append(subjects_hFB[f'S{i}'].correlation)
+        df_statsST_hFB.append(subjects_hFB[f'S{i}'].statsST)
+        df_statsPOF_hFB.append(subjects_hFB[f'S{i}'].statsPOF)
+        df_statsAPF_hFB.append(subjects_hFB[f'S{i}'].statsAPF)
+
+    save_corrstats(df_correlation_hFB, correlation_path_hFB)
+    save_corrstats(df_statsST_hFB, stats_path_hFB, FB = 'ST')
+    save_corrstats(df_statsPOF_hFB, stats_path_hFB, FB = 'POF')
+    save_corrstats(df_statsAPF_hFB, stats_path_hFB, FB = 'APF')
+    print('corr/stats done individually and saved as a group.csv')
+else:
+    df_correlation_hFB = pd.read_csv(correlation_path_hFB)
+
+# Check if the correlation file exists
+if not os.path.exists(correlation_path_vFB):
+    df_correlation_vFB = []
+    df_statsST_vFB = []
+    df_statsPOF_vFB = []
+    df_statsAPF_vFB = []
+    for i in range(1, n_vFB+1):
+        if i != 2 and i != 3 and i != 4 and i != 6 and i != 12:
+            subjects_vFB[f'S{i}'].correlation, subjects_vFB[f'S{i}'].statsST, subjects_vFB[f'S{i}'].statsPOF, subjects_vFB[f'S{i}'].statsAPF = subjects_vFB[f'S{i}'].calc_corrandstats()
+            df_correlation_vFB.append(subjects_vFB[f'S{i}'].correlation)
+            df_statsST_vFB.append(subjects_vFB[f'S{i}'].statsST)
+            df_statsPOF_vFB.append(subjects_vFB[f'S{i}'].statsPOF)
+            df_statsAPF_vFB.append(subjects_vFB[f'S{i}'].statsAPF)
+
+    save_corrstats(df_correlation_vFB, correlation_path_vFB)
+    save_corrstats(df_statsST_vFB, stats_path_vFB, FB = 'ST')
+    save_corrstats(df_statsPOF_vFB, stats_path_vFB, FB = 'POF')
+    save_corrstats(df_statsAPF_vFB, stats_path_vFB, FB = 'APF')
+    print('corr/stats done individually and saved as a group.csv')
+else:
+    df_correlation_vFB = pd.read_csv(correlation_path_vFB)
+
+calc_corrcoeffs (df_correlation_vFB, 'vFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
+Plotting.plot_correlation(df_correlation_vFB,show=True)
+
+

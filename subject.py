@@ -660,7 +660,7 @@ if not os.path.exists(correlation_path):
 else:
     df_correlation = pd.read_csv(correlation_path)
 
-#calc_corrcoeffs (df_correlation, 'hFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
+calc_corrcoeffs (df_correlation, 'hFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
 Plotting.plot_correlation(df_correlation,show=True)
 
 

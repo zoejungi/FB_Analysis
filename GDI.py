@@ -4,6 +4,7 @@ import numpy as np
 import os
 from helperfunctions import print_in_excel_table
 
+# definition of GDI function including its helperfunction to get data and plot specifically for GDI.
 def get_data(data_use, FB_param, input_path, excl=[]):
     if data_use == "GDI":
         parameters_subpaths = [
@@ -176,7 +177,7 @@ def GDI (input_path, FB_mode, FB_param, output_file, excl=[], plot = False, save
 #           FB_param = APF, ST or POF
 
 # output:   plots the GDI of each subject individually (NW to FB2 evolution)
-#           prints values in given document for GDI left and right. (all in same document)
+#           prints values in given document for GDI left and right
 
     # get all the param data
     df_left_pelvis_tilt, df_left_pelvis_obl, df_left_pelvis_rot, df_left_hip_flexion, df_left_hip_ad, \
@@ -225,7 +226,7 @@ def GDI (input_path, FB_mode, FB_param, output_file, excl=[], plot = False, save
                 df_right_hip_rot = df_right_hip_rot, df_right_knee_flexion = df_right_knee_flexion, df_right_ankle_plantarflexion = df_right_ankle_plantarflexion, df_right_foot_progression = df_right_foot_progression, point = point_NW, n_gaitcycles=5, right=False)
 
     c_NW = np.dot(G_NW, U).T
-    GPS_NW = np.linalg.norm(c_NW - c_control_matrix, axis=0) # distance au control
+    GPS_NW = np.linalg.norm(c_NW - c_control_matrix, axis=0) # distance to control
     GDI_raw_NW = np.log(GPS_NW)
 
     point_FB2 = f_intervals[3][1]

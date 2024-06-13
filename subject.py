@@ -68,6 +68,7 @@ class Subject (Plotting):
                 df_res[i]['ST_right_SMA5'] = df_res[i]['ST_right'].rolling(window=5, min_periods=1).mean()
         else:
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for ST")
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
             df_res = []
 
         return df_res
@@ -126,7 +127,8 @@ class Subject (Plotting):
                 df_left[i]['POF_left_SMA5'] = df_left[i]['POF'].rolling(window=5, min_periods=1).mean()
                 df_left[i]['POF_right_SMA5'] = df_right[i]['POF'].rolling(window=5, min_periods=1).mean()
         else:
-            # only one dataset instead of 3
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
+
             df_left = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for POF")
 
@@ -186,6 +188,7 @@ class Subject (Plotting):
                     df_apf_final[j]['APF_left_SMA5'] = df_apf_final[j]['apf_left'].rolling(window=5, min_periods=1).mean()
                     df_apf_final[j]['APF_right_SMA5'] = df_apf_final[j]['apf_right'].rolling(window=5, min_periods=1).mean()
         else:
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
             df_apf_final = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for APF")
 
@@ -256,6 +259,7 @@ class Subject (Plotting):
                 df_knee[i]['time'] = df_knee_left[i]['time']
 
         else:
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
             df_knee = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for kneeflexion")
 
@@ -324,6 +328,7 @@ class Subject (Plotting):
                 df_GRF[i]['time'] = df_GRF_left[i]['time']
 
         else:
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
             df_GRF = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for GRF")
 
@@ -381,6 +386,7 @@ class Subject (Plotting):
                 df_swing[i]['swingtime_right_SMA5'] = df_swing[i]['swingtime_right'].rolling(window=5, min_periods=1).mean()
 
         else:
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
             df_swing = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for swingtime")
 
@@ -433,6 +439,7 @@ class Subject (Plotting):
                 df_step[i]['steplength_right_SMA5'] = df_step[i]['step_length_right'].rolling(window=5, min_periods=1).mean()
 
         else:
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
             df_step = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for steplength")
 
@@ -486,6 +493,7 @@ class Subject (Plotting):
                 df_step[i]['stepheight_right_SMA5'] = df_step[i]['step_height_right'].rolling(window=5, min_periods=1).mean()
 
         else:
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
             df_step = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for stepheight")
 
@@ -539,13 +547,15 @@ class Subject (Plotting):
                 df_step[i]['stepwidth_right_SMA5'] = df_step[i]['step_width_right'].rolling(window=5, min_periods=1).mean()
 
         else:
+            # need still to be done; same code as above but for only 1 datapath -> results in 1 df instead of list of dfs.
             df_step = []
             print(f"Error: not FB study and no other study defined yet or S{self.ID} excluded for stepwidth")
 
         return df_step
 
     def calc_corrandstats(self):
-        # make df for correlation and for stats. -> row headers = condition (NW, duringST, during APF, during POF)
+        # make df for correlation and for stats.
+        #  -> row headers = condition (NWduringST, NWduringPOF, NWduringAPF, duringST, duringAPF, duringPOF)
         #  -> column headers = subject ID, cycle number, SR_raw of all gait params.
 
         df_ST = pd.concat([group_data(self, 'ST', self.ID[:-1], 'st'), group_data(self, 'POF', self.ID[:-1], 'st'),
@@ -561,35 +571,26 @@ class Subject (Plotting):
         df_APF = df_APF.rename(columns={'SR_raw': 'SR_APF'})
         df_APF = df_APF.rename(columns={'gait_cycle_left': 'cycle_number'})
 
-        df_swingtime = pd.concat(
-            [group_data(self, 'ST', self.ID[:-1], 'swingtime'), group_data(self, 'POF', self.ID[:-1], 'swingtime'),
-             group_data(self, 'APF', self.ID[:-1], 'swingtime')], ignore_index=True)
+        df_swingtime = pd.concat([group_data(self, 'ST', self.ID[:-1], 'swingtime'), group_data(self, 'POF', self.ID[:-1], 'swingtime'), group_data(self, 'APF', self.ID[:-1], 'swingtime')], ignore_index=True)
         df_swingtime = df_swingtime.rename(columns={'SR_raw': 'SR_swingtime'})
 
-        df_steplength = pd.concat(
-            [group_data(self, 'ST', self.ID[:-1], 'steplength'), group_data(self, 'POF', self.ID[:-1], 'steplength'),
-             group_data(self, 'APF', self.ID[:-1], 'steplength')], ignore_index=True)
+        df_steplength = pd.concat([group_data(self, 'ST', self.ID[:-1], 'steplength'), group_data(self, 'POF', self.ID[:-1], 'steplength'), group_data(self, 'APF', self.ID[:-1], 'steplength')], ignore_index=True)
         df_steplength = df_steplength.rename(columns={'SR_raw': 'SR_steplength'})
 
-        df_stepwidth = pd.concat(
-            [group_data(self, 'ST', self.ID[:-1], 'stepwidth'), group_data(self, 'POF', self.ID[:-1], 'stepwidth'),
-             group_data(self, 'APF', self.ID[:-1], 'stepwidth')], ignore_index=True)
+        df_stepwidth = pd.concat([group_data(self, 'ST', self.ID[:-1], 'stepwidth'), group_data(self, 'POF', self.ID[:-1], 'stepwidth'), group_data(self, 'APF', self.ID[:-1], 'stepwidth')], ignore_index=True)
         df_stepwidth = df_stepwidth.rename(columns={'SR_raw': 'SR_stepwidth'})
 
         df_stepheight = pd.concat(
-            [group_data(self, 'ST', self.ID[:-1], 'stepheight'), group_data(self, 'POF', self.ID[:-1], 'stepheight'),
-             group_data(self, 'APF', self.ID[:-1], 'stepheight')], ignore_index=True)
+            [group_data(self, 'ST', self.ID[:-1], 'stepheight'), group_data(self, 'POF', self.ID[:-1], 'stepheight'),group_data(self, 'APF', self.ID[:-1], 'stepheight')], ignore_index=True)
         df_stepheight = df_stepheight.rename(columns={'SR_raw': 'SR_stepheight'})
 
-        df_meanGRFz = pd.concat([group_data(self, 'ST', self.ID[:-1], 'GRFz'), group_data(self, 'POF', self.ID[:-1], 'GRFz'),
-                                 group_data(self, 'APF', self.ID[:-1], 'GRFz')], ignore_index=True)
+        df_meanGRFz = pd.concat([group_data(self, 'ST', self.ID[:-1], 'GRFz'), group_data(self, 'POF', self.ID[:-1], 'GRFz'), group_data(self, 'APF', self.ID[:-1], 'GRFz')], ignore_index=True)
         df_meanGRFz = df_meanGRFz.rename(columns={'SR_raw': 'SR_meanGRFz'})
 
-        df_kneeflexion = pd.concat(
-            [group_data(self, 'ST', self.ID[:-1], 'kneeflexion'), group_data(self, 'POF', self.ID[:-1], 'kneeflexion'),
-             group_data(self, 'APF', self.ID[:-1], 'kneeflexion')], ignore_index=True)
+        df_kneeflexion = pd.concat([group_data(self, 'ST', self.ID[:-1], 'kneeflexion'), group_data(self, 'POF', self.ID[:-1], 'kneeflexion'), group_data(self, 'APF', self.ID[:-1], 'kneeflexion')], ignore_index=True)
         df_kneeflexion = df_kneeflexion.rename(columns={'SR_raw': 'SR_kneeflexion'})
 
+        # merging all dfs in one df and ordering it depending on condition, subject_ID and cycle_number
         df_correlation = pd.merge(df_ST, df_POF, on=["condition", "subject_ID", "cycle_number"])
         df_correlation = pd.merge(df_correlation, df_APF, on=["condition", "subject_ID", "cycle_number"])
         df_correlation = pd.merge(df_correlation, df_swingtime, on=["condition", "subject_ID", "cycle_number"])
@@ -605,7 +606,10 @@ class Subject (Plotting):
         columns = df_correlation.columns.tolist()
         df_correlation = df_correlation[['subject_ID', 'condition'] + [col for col in columns if col not in ['subject_ID', 'condition']]]
 
-        # take the mean of the 10 last values of FB2 phase for statistical analysis
+        # take the mean of the 10 last values of NW and FB2 phase for statistical analysis -> gives df of 1 row and 19 columns
+        # column headers: subject_ID, SR_ST_NW, SR_ST, SR_POF_NW, SR_POF, SR_APF_NW, SR_APF, SR_swingtime_NW, SR_swingtime,
+        # SR_steplength_NW, SR_steplength, SR_stepwidth_NW, SR_stepwidth, SR_stepheight_NW, SR_stepheight, SR_meanGRFz_NW, SR_meanGRFz,
+        # SR_kneeflexion_NW, SR_kneeflexion
         mean_stats_ST = calc_stats(df_correlation, 'duringST')
         mean_stats_POF = calc_stats(df_correlation, 'duringPOF')
         mean_stats_APF = calc_stats(df_correlation, 'duringAPF')
@@ -613,55 +617,60 @@ class Subject (Plotting):
         return df_correlation, mean_stats_ST, mean_stats_POF, mean_stats_APF
 
 
+# correlation hFB and vFB and save stats files all
 
-# Assuming correlation_file is the path to the correlation file
-correlation_path = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\correlation.csv'
-stats_path = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB'
+correlation_path_hFB = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\correlation.csv'
+stats_path_hFB = r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB'
+correlation_path_vFB = r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB\correlation.csv'
+stats_path_vFB = r'C:\Users\User\Documents\CEFIR_LLUI\Visual FB'
 
-# Check if the correlation file exists
-if not os.path.exists(correlation_path):
-    # create all subjects and calculate all gait parameters for all
-    n_hFB = 3
-    subjects_hFB = {}
-
-    for i in range(1, n_hFB + 1):
-        subjects_hFB[f'S{i}'] = Subject(f'S{i}_', "hFB", r'C:\Users\User\Documents\CEFIR_LLUI\Haptic FB\Data')
-    print('dictionary subjects hFB created')
-
-    for i in range(1, n_hFB + 1):
-        subjects_hFB[f'S{i}'].st = subjects_hFB[f'S{i}'].ST()
-        subjects_hFB[f'S{i}'].pof = subjects_hFB[f'S{i}'].POF()
-        subjects_hFB[f'S{i}'].apf = subjects_hFB[f'S{i}'].maxAPF()
-        subjects_hFB[f'S{i}'].swingtime = subjects_hFB[f'S{i}'].swingTime()
-        subjects_hFB[f'S{i}'].steplength = subjects_hFB[f'S{i}'].stepLength()
-        subjects_hFB[f'S{i}'].stepheight = subjects_hFB[f'S{i}'].stepHeight()
-        subjects_hFB[f'S{i}'].stepwidth = subjects_hFB[f'S{i}'].stepWidth()
-        subjects_hFB[f'S{i}'].GRFz = subjects_hFB[f'S{i}'].meanGRFz()
-        subjects_hFB[f'S{i}'].kneeflexion = subjects_hFB[f'S{i}'].maxKneeflexion()
-    print('gait parameters calculated for all subjects hFB')
-
-    df_correlation = []
-    df_statsST = []
-    df_statsPOF = []
-    df_statsAPF = []
-
+# Check if the correlation file exists, then normally stats files exist as well.
+if not os.path.exists(correlation_path_hFB):
+    df_correlation_hFB = []
+    df_statsST_hFB = []
+    df_statsPOF_hFB = []
+    df_statsAPF_hFB = []
     for i in range(1, n_hFB+1):
         subjects_hFB[f'S{i}'].correlation, subjects_hFB[f'S{i}'].statsST, subjects_hFB[f'S{i}'].statsPOF, subjects_hFB[f'S{i}'].statsAPF = subjects_hFB[f'S{i}'].calc_corrandstats()
-        df_correlation.append(subjects_hFB[f'S{i}'].correlation)
-        df_statsST.append(subjects_hFB[f'S{i}'].statsST)
-        df_statsPOF.append(subjects_hFB[f'S{i}'].statsPOF)
-        df_statsAPF.append(subjects_hFB[f'S{i}'].statsAPF)
+        df_correlation_hFB.append(subjects_hFB[f'S{i}'].correlation)
+        df_statsST_hFB.append(subjects_hFB[f'S{i}'].statsST)
+        df_statsPOF_hFB.append(subjects_hFB[f'S{i}'].statsPOF)
+        df_statsAPF_hFB.append(subjects_hFB[f'S{i}'].statsAPF)
 
-    save_corrstats(df_correlation, correlation_path)
-    save_corrstats(df_statsST, stats_path, FB = 'ST')
-    save_corrstats(df_statsPOF, stats_path, FB = 'POF')
-    save_corrstats(df_statsAPF, stats_path, FB = 'APF')
-    print('corr/stats done individually and saved as a group.csv')
+    save_corrstats(df_correlation_hFB, correlation_path_hFB)
+    save_corrstats(df_statsST_hFB, stats_path_hFB, FB = 'ST')
+    save_corrstats(df_statsPOF_hFB, stats_path_hFB, FB = 'POF')
+    save_corrstats(df_statsAPF_hFB, stats_path_hFB, FB = 'APF')
+    print('corr/stats done individually and saved as a group.csv (hFB)')
 else:
-    df_correlation = pd.read_csv(correlation_path)
+    df_correlation_hFB = pd.read_csv(correlation_path_hFB)
 
-calc_corrcoeffs (df_correlation, 'hFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
-Plotting.plot_correlation(df_correlation,show=True)
+# Check if the correlation file exists
+if not os.path.exists(correlation_path_vFB):
+    df_correlation_vFB = []
+    df_statsST_vFB = []
+    df_statsPOF_vFB = []
+    df_statsAPF_vFB = []
+    for i in range(1, n_vFB+1):
+        if i != 2 and i != 3 and i != 4 and i != 6 and i != 12:
+            subjects_vFB[f'S{i}'].correlation, subjects_vFB[f'S{i}'].statsST, subjects_vFB[f'S{i}'].statsPOF, subjects_vFB[f'S{i}'].statsAPF = subjects_vFB[f'S{i}'].calc_corrandstats()
+            df_correlation_vFB.append(subjects_vFB[f'S{i}'].correlation)
+            df_statsST_vFB.append(subjects_vFB[f'S{i}'].statsST)
+            df_statsPOF_vFB.append(subjects_vFB[f'S{i}'].statsPOF)
+            df_statsAPF_vFB.append(subjects_vFB[f'S{i}'].statsAPF)
 
+    save_corrstats(df_correlation_vFB, correlation_path_vFB)
+    save_corrstats(df_statsST_vFB, stats_path_vFB, FB = 'ST')
+    save_corrstats(df_statsPOF_vFB, stats_path_vFB, FB = 'POF')
+    save_corrstats(df_statsAPF_vFB, stats_path_vFB, FB = 'APF')
+    print('corr/stats done individually and saved as a group.csv (vFB)')
+else:
+    df_correlation_vFB = pd.read_csv(correlation_path_vFB)
 
+calc_corrcoeffs (df_correlation_hFB, 'hFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
+Plotting.plot_correlation(df_correlation_hFB)
+
+calc_corrcoeffs (df_correlation_vFB, 'vFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
+Plotting.plot_correlation(df_correlation_vFB)
+print('correlation plotted and printed for hFB/vFB')
 

@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 
 class Plotting:
 
+    #to have all plots with the same fontsizes
+
     xticks = 14 #fontsize xticks labels
     t = 18 #fontsize, title
     a = 0.8 #transparency of color = alpha
@@ -48,8 +50,8 @@ class Plotting:
         plt.axhline(y=1, color='lightgrey', linestyle='-', linewidth=1)
 
         if target:
-            plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label='Target Value')
-            plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2, label='Margin zone')
+            plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label='Target SR')
+            plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2)
         ax = plt.subplot()
         if yaxis:
             # Autoscale the y-axis
@@ -96,8 +98,8 @@ class Plotting:
         plt.axhline(y=1, color='lightgrey', linestyle='-', linewidth=1)
 
         if target:
-            plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label='Target Value')
-            plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2, label='Margin zone')
+            plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label='Target SR')
+            plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2)
         ax = plt.subplot()
         if yaxis:
             # Autoscale the y-axis
@@ -149,7 +151,7 @@ class Plotting:
         plt.axhline(y=1, color='lightgrey', linestyle='-', linewidth=1)
 
         if target:
-            plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1)
+            plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label = 'Target SR')
             plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2)
         ax = plt.subplot()
         if yaxis:
@@ -205,7 +207,7 @@ class Plotting:
         plt.axhline(y=1, color='lightgrey', linestyle='-', linewidth=1)
 
         if target:
-            plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1)
+            plt.axhline(y=0.8, color='g', linestyle='--', linewidth=1, label = 'Target SR')
             plt.axhspan(0.75, 0.85, facecolor='palegreen', alpha=0.2)
         ax = plt.subplot()
         if yaxis:
@@ -247,6 +249,8 @@ class Plotting:
         plt.close()
     @classmethod
     def plot_correlation(cls, df, show = False, save = False):
+        #plot correlation graphs during ST, APF and POF using df_correlation file having data from all subjects in all conditions and for all SR_params
+
         df_ST = df[(df['condition'] == 'NWduringST') | (df['condition'] == 'duringST')]
         df_POF = df[(df['condition'] == 'NWduringPOF') | (df['condition'] == 'duringPOF')]
         df_APF = df[(df['condition'] == 'NWduringAPF') | (df['condition'] == 'duringAPF')]
@@ -273,7 +277,7 @@ class Plotting:
             poly = np.poly1d(coeffs)
             plt.plot(df_ST["SR_ST"], poly(df_ST["SR_ST"]), color='black', label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
             if save:
-                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\CorrST_{columns_ST[i]}.png')
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\CorrST_{columns_ST[i]}.png')
             if show:
                 plt.show()
             plt.close()
@@ -301,7 +305,7 @@ class Plotting:
             plt.plot(df_POF["SR_POF"], poly(df_POF["SR_POF"]), color='black',
                      label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
             if save:
-                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\CorrPOF_{columns_POF[i]}.png')
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\CorrPOF_{columns_POF[i]}.png')
             if show:
                 plt.show()
             plt.close()
@@ -329,7 +333,7 @@ class Plotting:
             plt.plot(df_APF["SR_APF"], poly(df_APF["SR_APF"]), color='black',
                      label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
             if save:
-                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\CorrAPF_{columns_APF[i]}.png')
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\CorrAPF_{columns_APF[i]}.png')
             if show:
                 plt.show()
             plt.close()

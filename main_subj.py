@@ -304,6 +304,7 @@ if not os.path.exists(correlation_path_hFB):
     print('corr/stats done individually and saved as a group.csv (hFB)')
 else:
     df_correlation_hFB = pd.read_csv(correlation_path_hFB)
+    print('correlation file hFB read')
 
 # Check if the correlation file exists
 if not os.path.exists(correlation_path_vFB):
@@ -326,10 +327,11 @@ if not os.path.exists(correlation_path_vFB):
     print('corr/stats done individually and saved as a group.csv (vFB)')
 else:
     df_correlation_vFB = pd.read_csv(correlation_path_vFB)
+    print('correlation file vFB read')
 
 calc_corrcoeffs (df_correlation_hFB, 'hFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
-Plotting.plot_correlation(df_correlation_hFB)
+Plotting.plot_correlation(df_correlation_hFB, 'hFB', save=True)
 
 calc_corrcoeffs (df_correlation_vFB, 'vFB', r'C:\Users\User\Documents\CEFIR_LLUI\Result_tables_all.xlsx')
-Plotting.plot_correlation(df_correlation_vFB)
+Plotting.plot_correlation(df_correlation_vFB, 'vFB', save=True)
 print('correlation plotted and printed for hFB/vFB')

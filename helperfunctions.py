@@ -5,7 +5,6 @@ import pandas as pd
 import os
 import numpy as np
 import matplotlib.colors as mcolors
-import seaborn as sns
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
 from openpyxl import load_workbook

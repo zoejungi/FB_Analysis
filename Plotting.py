@@ -248,7 +248,7 @@ class Plotting:
             plt.show()
         plt.close()
     @classmethod
-    def plot_correlation(cls, df, show = False, save = False):
+    def plot_correlation(cls, df, FB, show = False, save = False):
         #plot correlation graphs during ST, APF and POF using df_correlation file having data from all subjects in all conditions and for all SR_params
 
         df_ST = df[(df['condition'] == 'NWduringST') | (df['condition'] == 'duringST')]
@@ -277,7 +277,7 @@ class Plotting:
             poly = np.poly1d(coeffs)
             plt.plot(df_ST["SR_ST"], poly(df_ST["SR_ST"]), color='black', label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
             if save:
-                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\CorrST_{columns_ST[i]}.png')
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\{FB}_CorrST_{columns_ST[i]}.png')
             if show:
                 plt.show()
             plt.close()
@@ -305,7 +305,7 @@ class Plotting:
             plt.plot(df_POF["SR_POF"], poly(df_POF["SR_POF"]), color='black',
                      label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
             if save:
-                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\CorrPOF_{columns_POF[i]}.png')
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\{FB}_CorrPOF_{columns_POF[i]}.png')
             if show:
                 plt.show()
             plt.close()
@@ -333,7 +333,7 @@ class Plotting:
             plt.plot(df_APF["SR_APF"], poly(df_APF["SR_APF"]), color='black',
                      label=f'Linear regression: y={coeffs[0]:.2f}x + {coeffs[1]:.2f}', linewidth=1)
             if save:
-                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\CorrAPF_{columns_APF[i]}.png')
+                plt.savefig(rf'C:\Users\User\Documents\CEFIR_LLUI\Plots\Correlation\{FB}_CorrAPF_{columns_APF[i]}.png')
             if show:
                 plt.show()
             plt.close()

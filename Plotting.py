@@ -266,7 +266,7 @@ class Plotting:
 
             plt.xlabel("ST SR", fontsize=cls.f)
             plt.ylabel(columns_ST[i], fontsize=cls.f)
-            plt.legend(fontsize=cls.f, bbox_to_anchor=(0.65, 1.1), loc='upper left', borderaxespad=0.)
+            plt.legend(fontsize=cls.f)
             plt.ylim(0.5, 2.3)
             plt.xlim(0, 3)
             plt.xticks(fontsize=cls.f)
@@ -293,7 +293,7 @@ class Plotting:
 
             plt.xlabel("POF SR", fontsize=cls.f)
             plt.ylabel(columns_POF[i], fontsize=cls.f)
-            plt.legend(fontsize=cls.f, bbox_to_anchor=(0.65, 1.1), loc='upper left', borderaxespad=0.)
+            plt.legend(fontsize=cls.f)
             plt.ylim(0.5, 2.3)
             plt.xlim(0, 3)
             plt.xticks(fontsize=cls.f)
@@ -321,7 +321,7 @@ class Plotting:
 
             plt.xlabel("APF SR", fontsize=cls.f)
             plt.ylabel(columns_APF[i], fontsize=cls.f)
-            plt.legend(fontsize=cls.f, bbox_to_anchor=(0.65, 1.1), loc='upper left', borderaxespad=0.)
+            plt.legend(fontsize=cls.f)
             plt.ylim(0.5, 2.3)
             plt.xlim(0, 3)
             plt.xticks(fontsize=cls.f)

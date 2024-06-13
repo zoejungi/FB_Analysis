@@ -1,5 +1,5 @@
-#helperfunctions for main or for functions
-import copy
+# helperfunctions for main_subj.py, GDI.py or class functions (in Subject Class)
+
 import math
 import pandas as pd
 import os
@@ -10,6 +10,10 @@ from scipy.stats import spearmanr
 from openpyxl import load_workbook
 
 def get_filepath (datapath, sub_id, FB, param):
+    # input = datapath to all data folders, sub_ID (='S1_', don't forget the underscore), FB = targeted param, param = analyzed param
+    # output = filepath to needed file for analyzing different params (APF = DFlowData, ST & other spatiotemporal params = spatiotemp files,
+    # POF & everything else = extraction_normalization file)
+
     if param == 'APF':
         # take DFlow data
         dflow_path = os.path.join (datapath, 'D-FlowData')
@@ -62,6 +66,9 @@ def get_filepath (datapath, sub_id, FB, param):
 
     return filepath
 def convert_txt_to_csv (input_path, separator = ','):
+    # input = input_path = file including its path, separator of txt file
+    # output = csv.file
+
     base, _ = os.path.splitext(input_path)
     output_path = base + '.csv'
     # Read the input text file
@@ -71,6 +78,11 @@ def convert_txt_to_csv (input_path, separator = ','):
 
     return output_path
 def identify_maxAPF (df_apf, sub_id=[], datapath=[]):
+    # input = df_apf = raw DFlowdata, sub_id and datapath for saving data
+    # output = list of dfs (during ST, POF and APF FB), headers include  'apf_left', 'apf_right',
+    #             'time', 'real_time_left', 'real_time_right', 'gait_cycle_left', 'gait_cycle_right',
+    #             'group_id' (for saving all three datafiles in one file -> 0 = ST, 1 = POF, 2 = APF)
+
     # Identifying max APF
     df_final = []
     for i, df in enumerate(df_apf):
@@ -78,13 +90,11 @@ def identify_maxAPF (df_apf, sub_id=[], datapath=[]):
         group_id = i
         apf_left_i = []
         apf_right_i = []
-        time_i = []
         real_time_max_apf_left_i = []
         real_time_max_apf_right_i = []
         gait_cycle_left_i = []
         gait_cycle_right_i = []
 
-        prev_lhs = 2.0
         prev_lto = 2.0
         prev_rto = 2.0
 
@@ -128,7 +138,6 @@ def identify_maxAPF (df_apf, sub_id=[], datapath=[]):
 
                         apf_right_i.append(right_max_apf)
                         real_time_max_apf_right_i.append(float(time_right_max_apf))
-                        # gait_cycle_right_i.append(max(df_apf[i].loc[min_index_left, "LHS"], df_apf[i].loc[min_index_left, "RHS"])) # if you want gait cycle depending of wich foot the subject move first
                         gait_cycle_right_i.append(df_apf[i].loc[min_index_left, "LHS"])  # gait cycle for left foot # I use this one because this is what we did for the other parameters in the other notebook
 
                 prev_rto = rto
@@ -166,6 +175,8 @@ def identify_maxAPF (df_apf, sub_id=[], datapath=[]):
     return df_final
 
 def check_cycles (df):
+    # input = df_apf (should have gait_cycle_left and gait_cycle_right)
+    # output = True (if no event is missing), False (if event is missing)
     # to check that no event is missing for one foot and not the other
     for i, data in enumerate(df):
         unique_left = [element for element in df[i]['gait_cycle_left'] if element not in df[i]['gait_cycle_right']]
@@ -178,6 +189,9 @@ def check_cycles (df):
             return False
     return True
 def exclude_outliers(df):
+    # input = list of dataframes -> column headers needed: 'apf_left', 'apf_right'
+    # output = same list of dataframes without all the outliers (apf>=-50, apf>=20 or apf=None)
+
     # Iterate over each DataFrame in the list
     for i in range(len(df)):
         # Create a boolean mask to identify the rows to keep
@@ -189,6 +203,9 @@ def exclude_outliers(df):
         df[i] = df[i][mask].reset_index(drop=True)
         print("New length:", len(df[i]['apf_left']))
 def print_in_excel_table(value, sheet_name, row_header, column_header, output_file):
+    # input = value to print, sheet_name, row_header (needs to be already created), column_header (needs to be already created), path to output-file
+    # output = None -> only printing (excel needs to be closed for printing, otherwise it's not working)
+
     # Load the existing Excel file
     book = load_workbook(output_file)
 
@@ -220,6 +237,9 @@ def print_in_excel_table(value, sheet_name, row_header, column_header, output_fi
         # No need to set writer.book or writer.sheets explicitly
         df.to_excel(writer, sheet_name=sheet_name)
 def calculate_averages (subjects, FB_mode, param):
+    # input = subjects = list of subjects to calculate the average on, FB_mode = 'hFB' or 'vFB', param = analyzed param all inlower case
+    # output = 3 pd.series (mean_SR, std_SR, mean_time)
+
     t_intervals = [(0, 60), (60, 240), (240, 300), (300, 480), (480, 660)]
     participant_averages = {}
     if FB_mode.lower() == 'st':
@@ -269,22 +289,31 @@ def calculate_averages (subjects, FB_mode, param):
 
     return pd.Series(mean_SR), pd.Series(std_SR), pd.Series(mean_time)
 def get_color(base_color, incr):
+    #used for getting shades of the same color for the graphs
+
     base_rgb = mcolors.to_rgb(base_color)
     similar_color = tuple(min(1, c + incr) for c in base_rgb)  # Adjust the increment value as needed
     return similar_color
 
 def weighted_std_mean(values, weights):
+    # used for calculating means for SUS
+
     mean = np.average(values, weights=weights)
     variance = np.average((values - mean) ** 2, weights=weights)
     return np.sqrt(variance), mean
 
 def calculate_mean_interval(t_start, t_end, df, decimals = 2):
+    #used to calculate mean SR in a defined interval (i.e. individual subjects during each FB phase)
+
     filt = (df['time'] >= t_start) & (df['time'] <= t_end)
     df_filt = df[filt]
     mean = np.mean(df_filt['SR'])
     return np.round(mean,decimals)
 
 def group_data(subject, FB, ID, param):
+    # input = subject for correlation (only 1), FB (mode), ID, param analysed
+    # output = dataframe for correlation for specific subject
+
     if FB == 'ST':
         j = 0
     elif FB == 'POF':
@@ -312,6 +341,9 @@ def group_data(subject, FB, ID, param):
     return pd.concat([df_NW, df_FB2], ignore_index = True)
 
 def calc_stats (df_corr, FB):
+    # input = correlation dataframe with all subjects included, all conditions ('NWduringST', 'duringST', etc), all params)
+    # output = meanStats during FB (=dataframe with 1 row and 19 headers)
+
     mean_stats = {'subject_ID': []}
 
     columns_to_mean = ["SR_ST", "SR_POF", "SR_APF", "SR_swingtime", "SR_steplength", "SR_stepwidth", "SR_stepheight",
@@ -328,6 +360,9 @@ def calc_stats (df_corr, FB):
     return pd.DataFrame(mean_stats)
 
 def save_corrstats(df, path, FB=False):
+    # input = df (correlation or stats, if stats then FB = 'ST', 'POF', or 'APF'), path = saving path
+    # output = None
+
     df = pd.concat(df)
     if FB == False:
         df = df.sort_values(by=['condition', 'subject_ID', 'cycle_number'])
@@ -337,6 +372,9 @@ def save_corrstats(df, path, FB=False):
         stats_path = os.path.join(path, 'stats' + FB + '.csv')
         df.to_csv(stats_path, index=False)
 def calc_corrcoeffs(df, FB_mode, output_file):
+    # input = correlation dataframe, FB_mode, output_file to save data
+    # output = None, only printing in excel.
+
     df_ST = df[(df['condition'] == 'NWduringST') | (df['condition'] == 'duringST')]
     df_POF = df[(df['condition'] == 'NWduringPOF') | (df['condition'] == 'duringPOF')]
     df_APF = df[(df['condition'] == 'NWduringAPF') | (df['condition'] == 'duringAPF')]
